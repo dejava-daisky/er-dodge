@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ER Dodge Analyzer</title>
+    <style>
+        body { font-family: Arial; background:#111; color:white; }
+        input { padding:8px; margin:5px; }
+        button { padding:8px 15px; }
+        .card {
+            background:#222;
+            padding:15px;
+            margin:10px 0;
+            border-radius:8px;
+        }
+        .warning { color: #ff5555; }
+        .good { color: #00ff99; }
+        .bad { color: #ff9900; }
+    </style>
+</head>
+<body>
+
+<h2>이터널리턴 트롤 제거기</h2>
+
+<form method="POST">
+    <input type="text" name="nick1" placeholder="팀원1 닉네임">
+    <input type="text" name="nick2" placeholder="팀원2 닉네임">
+    <button type="submit">분석</button>
+</form>
+
+{% if result %}
+    {% for nick, data in result.items() %}
+        <div class="card">
+            <h3>{{ nick }}</h3>
+
+            {% if data.error %}
+                <p class="warning">오류: {{ data.error }}</p>
+            {% else %}
+                <p>점수: {{ data.score }}</p>
+                <p>등급: {{ data.grade }}</p>
+                <p>{{ data.comment }}</p>
+
+                {% if data.warnings %}
+                    <p class="warning">
+                        ⚠ {{ data.warnings | join(', ') }}
+                    </p>
+                {% endif %}
+            {% endif %}
+        </div>
+    {% endfor %}
+{% endif %}
+
+</body>
+</html>
