@@ -232,17 +232,28 @@ def evaluate_player(nickname):
     season = get_rank_season_from_games(uid)
     stats = get_season_stats(uid, season)
     recent = get_recent_games(uid)
-
+    
     score, comment = calculate_score(stats, recent)
     warnings = generate_warnings(stats, recent)
+
+    total_games = stats["totalGames"]
+
+    # 50판 미만이면 표본 부족 처리
+    if total_games < 50:
+        warnings.append("표본 부족 (50판 미만)")
+        final_grade = "⚪ 표본 부족"
+    else:
+        final_grade = grade(score)
 
     return {
         "nickname": nickname,
         "score": score,
-        "grade": grade(score),
+        "grade": final_grade,
         "comment": comment,
-        "warnings": warnings
-    }
+        "warnings": warnings,
+        "total_games": total_games
+        }
+
 
 
 # -----------------------------
@@ -263,4 +274,5 @@ def run():
 
 
 if __name__ == "__main__":
+
     run()
