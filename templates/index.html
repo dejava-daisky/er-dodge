@@ -1,53 +1,196 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-    <title>ER Dodge Analyzer</title>
-    <style>
-        body { font-family: Arial; background:#111; color:white; }
-        input { padding:8px; margin:5px; }
-        button { padding:8px 15px; }
-        .card {
-            background:#222;
-            padding:15px;
-            margin:10px 0;
-            border-radius:8px;
-        }
-        .warning { color: #ff5555; }
-        .good { color: #00ff99; }
-        .bad { color: #ff9900; }
-    </style>
+<meta charset="UTF-8">
+<title>띠아의 팀원 초상화</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+}
+
+input {
+    width: 70%;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+}
+
+button {
+    padding: 12px 20px;
+    margin-left: 10px;
+    border-radius: 8px;
+    border: none;
+    background: #6c5ce7;
+    color: white;
+    cursor: pointer;
+}
+
+.loading {
+    display: none;
+    margin-top: 30px;
+}
+
+.result-card {
+    margin-top: 30px;
+    background: #222;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: left;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header img {
+    width: 80px;
+}
+
+.section {
+    margin-top: 15px;
+}
+
+.summary {
+    margin-top: 15px;
+    white-space: pre-line;
+    background: #1b1b1b;
+    padding: 12px;
+    border-radius: 10px;
+}
+</style>
 </head>
+
 <body>
+<div class="container">
 
-<h2>이터널리턴 트롤 제거기</h2>
+<h1>ER 팀원 브리핑</h1>
 
-<form method="POST">
-    <input type="text" name="nick1" placeholder="팀원1 닉네임">
-    <input type="text" name="nick2" placeholder="팀원2 닉네임">
-    <button type="submit">분석</button>
-</form>
+<input type="text" id="nickInput" placeholder="닉네임1 닉네임2 (공백 , / 가능)">
+<button onclick="analyze()">분석</button>
 
-{% if result %}
-    {% for nick, data in result.items() %}
-        <div class="card">
-            <h3>{{ nick }}</h3>
+<div class="loading" id="loading">
+    <p>로딩중이야,,!!</p>
+    <img src="/tia-run.gif" width="120">
+</div>
 
-            {% if data.error %}
-                <p class="warning">오류: {{ data.error }}</p>
-            {% else %}
-                <p>점수: {{ data.score }}</p>
-                <p>등급: {{ data.grade }}</p>
-                <p>{{ data.comment }}</p>
+<div id="results"></div>
 
-                {% if data.warnings %}
-                    <p class="warning">
-                        ⚠ {{ data.warnings | join(', ') }}
-                    </p>
-                {% endif %}
-            {% endif %}
-        </div>
-    {% endfor %}
-{% endif %}
+</div>
+
+<script>
+function parseNicknames(input) {
+    return input
+        .trim()
+        .split(/[ ,\/]+/)
+        .filter(n => n.length > 0)
+        .slice(0, 2);
+}
+
+async function analyze() {
+
+    const raw = document.getElementById("nickInput").value;
+    const nicks = parseNicknames(raw);
+
+    if (nicks.length === 0) {
+        alert("닉네임 입력해라");
+        return;
+    }
+
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("results").innerHTML = "";
+
+    const response = await fetch("/analyze", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ nicknames: nicks })
+    });
+
+    const data = await response.json();
+
+    document.getElementById("loading").style.display = "none";
+
+    for (const nick of nicks) {
+        const result = data[nick];
+        if (!result) continue;
+
+        if (result.status === "sample") {
+            document.getElementById("results").innerHTML += `
+                <div class="result-card">
+                    <h2>${nick}</h2>
+                    <p>${result.message}</p>
+                </div>
+            `;
+            continue;
+        }
+
+        let imgName = "squirrel_green.png";
+        if (result.squirrel === "purple") imgName = "squirrel_purple.png";
+        if (result.squirrel === "orange") imgName = "squirrel_orange.png";
+
+        let strengthsHtml = "";
+        if (result.squirrel !== "orange" && result.strengths.length > 0) {
+            strengthsHtml += "<div class='section'><h3>장점</h3>";
+            result.strengths.forEach(s => {
+                strengthsHtml += `<div>• ${s}</div>`;
+            });
+            strengthsHtml += "</div>";
+        }
+
+        let risksHtml = "";
+        if (result.major_risks.length || result.minor_risks.length) {
+            risksHtml += "<div class='section'><h3>단점</h3>";
+            result.major_risks.forEach(r => {
+                risksHtml += `<div>• ${r}</div>`;
+            });
+            result.minor_risks.forEach(r => {
+                risksHtml += `<div>• ${r}</div>`;
+            });
+            risksHtml += "</div>";
+        }
+
+        document.getElementById("results").innerHTML += `
+            <div class="result-card">
+                <div class="header">
+                    <img src="/${imgName}">
+                    <div>
+                        <div style="font-size:20px;font-weight:bold;">${result.nickname}</div>
+                        <div>점수: ${result.score}</div>
+                    </div>
+                </div>
+                ${risksHtml}
+                ${strengthsHtml}
+                <div class="section">
+                    <h3>총평</h3>
+                    <div class="summary">${result.summary}</div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+document.getElementById("nickInput")
+.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") analyze();
+});
+</script>
 
 </body>
 </html>
