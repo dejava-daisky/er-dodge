@@ -1,7 +1,5 @@
 import requests
 import time
-import statistics
-import json
 import os
 from dotenv import load_dotenv
 
@@ -9,12 +7,11 @@ load_dotenv()
 API_KEY = os.getenv("ER_API_KEY")
 BASE_URL = "https://open-api.bser.io"
 
-headers = {
-    "x-api-key": API_KEY
-}
+headers = {"x-api-key": API_KEY}
+
 
 # -----------------------------
-# 기본 API 함수
+# API 기본 함수
 # -----------------------------
 
 def safe_get(url, params=None):
@@ -32,12 +29,9 @@ def get_uid(nickname):
 def get_rank_season_from_games(uid):
     url = f"{BASE_URL}/v1/user/games/uid/{uid}"
     data = safe_get(url)
-    games = data["userGames"]
-
-    for g in games:
+    for g in data["userGames"]:
         if g["matchingMode"] == 3 and g["seasonId"] > 0:
             return g["seasonId"]
-
     raise Exception("랭크 시즌 찾기 실패")
 
 
@@ -47,16 +41,15 @@ def get_season_stats(uid, season_id):
     return data["userStats"][0]
 
 
-def get_recent_games(uid, count=10):
+def get_recent_games(uid, count=20):
     url = f"{BASE_URL}/v1/user/games/uid/{uid}"
     data = safe_get(url)
-    games = data["userGames"]
-    rank_games = [g for g in games if g["matchingMode"] == 3]
+    rank_games = [g for g in data["userGames"] if g["matchingMode"] == 3]
     return rank_games[:count]
 
 
 # -----------------------------
-# 점수 계산
+# 점수 계산 + 장단점 생성
 # -----------------------------
 
 def calculate_score(stats, recent_games):
@@ -65,165 +58,130 @@ def calculate_score(stats, recent_games):
     average_rank = stats["averageRank"]
     win_rate = stats["totalWins"] / total_games
     top3 = stats.get("top3", 0)
+    top5 = stats.get("top5", 0)
+    top7 = stats.get("top7", 0)
 
     char_stats = stats["characterStats"]
     most_used = max(c["totalGames"] for c in char_stats)
     most_used_ratio = most_used / total_games
 
     score = 0
-    breakdown = {}
+    strengths = []
+    major_risks = []
+    minor_risks = []
 
-    # 평균 등수 (15)
-    rank_score = 0
+    # ---------------- 평균 등수
     if average_rank <= 4.0:
-        rank_score = 15
+        score += 15
+        strengths.append("평균등수가 안정적입니다.")
+    elif average_rank <= 4.3:
+        score += 12
     elif average_rank <= 4.5:
-        rank_score = 10
-    elif average_rank <= 5.0:
-        rank_score = 5
-    breakdown["평균 등수"] = (rank_score, 15)
-    score += rank_score
+        score += 8
 
-    # 승률 (20)
-    win_score = 0
+    # ---------------- 승률
     if win_rate >= 0.18:
-        win_score = 20
+        score += 20
+        strengths.append("막금구교전에서 빛을 발합니다.")
     elif win_rate >= 0.14:
-        win_score = 14
+        score += 14
     elif win_rate >= 0.10:
-        win_score = 8
-    breakdown["승률"] = (win_score, 20)
-    score += win_score
+        score += 8
+    else:
+        if total_games >= 50 and win_rate < 0.08:
+            major_risks.append("승률이 낮은편입니다.")
 
-    # top3 (15)
-    top3_score = 0
+    # ---------------- TOP3
     if top3 >= 0.50:
-        top3_score = 15
+        score += 15
+        strengths.append("TOP3비율이 높습니다.")
     elif top3 >= 0.40:
-        top3_score = 12
+        score += 12
     elif top3 >= 0.30:
-        top3_score = 8
+        score += 8
     elif top3 >= 0.20:
-        top3_score = 4
-    breakdown["상위권 전환력"] = (top3_score, 15)
-    score += top3_score
+        score += 4
 
-    # 실험체 집중도 (20)
-    focus_score = 0
+    # ---------------- 숙련도
     if total_games >= 50:
-        if most_used_ratio >= 0.4:
-            focus_score = 20
-        elif most_used_ratio >= 0.25:
-            focus_score = 15
-        elif most_used_ratio >= 0.15:
-            focus_score = 8
+        if most_used_ratio >= 0.40:
+            score += 20
+            strengths.append("한 실험체를 많이 플레이합니다.")
+        elif most_used_ratio < 0.15:
+            major_risks.append("이것저것 실험체를 여러개 하는편입니다.")
     else:
-        focus_score = 10
-    breakdown["실험체 숙련도"] = (focus_score, 20)
-    score += focus_score
+        score += 10
 
-    # 최근 폼 (30)
-    form_score = 0
+    # ---------------- 최근 폼
     if recent_games:
         avg_rank_recent = sum(g["gameRank"] for g in recent_games) / len(recent_games)
         avg_damage_recent = sum(g["damageToPlayer"] for g in recent_games) / len(recent_games)
 
-        # 최근 평균 등수 (20)
         if avg_rank_recent <= 4:
-            form_score += 20
-        elif avg_rank_recent <= 5:
-            form_score += 12
-        elif avg_rank_recent <= 6:
-            form_score += 5
+            score += 20
+            strengths.append("최근20경기의 폼이 좋습니다.")
+        elif avg_rank_recent > 6 and avg_damage_recent < 7000:
+            major_risks.append("최근20경기 폼이 급락중입니다.")
 
-        # 최근 평균 딜 (10)
-        if avg_damage_recent >= 11000:
-            form_score += 10
-        elif avg_damage_recent >= 9500:
-            form_score += 6
-        elif avg_damage_recent >= 8000:
-            form_score += 3
+        if avg_damage_recent >= 15000:
+            score += 10
+            strengths.append("최근20경기에서 딜량이 좋습니다.")
+        elif avg_damage_recent < 9000:
+            minor_risks.append("최근20경기 딜량이 낮습니다. 탱커유저인가요?")
 
-    breakdown["최근 폼"] = (form_score, 30)
-    score += form_score
+    # ---------------- 초반 사출 감점
+    gap = top7 - top5
+    if gap >= 0.25:
+        score -= 10
+        major_risks.append("초반(6~8등)에 사출을 자주당합니다.")
+    elif gap >= 0.15:
+        score -= 5
+        minor_risks.append("초반에 사출당하는 경향이 있습니다.")
 
-    # 가장 취약한 항목
-    weakest = min(
-        breakdown.items(),
-        key=lambda x: x[1][0] / x[1][1]
-    )[0]
+    if score < 0:
+        score = 0
 
-    comment_map = {
-        "평균 등수": "평균 등수 낮음",
-        "승률": "승률 낮음",
-        "상위권 전환력": "상위권 전환율 낮음",
-        "실험체 숙련도": "실험체 숙련도 낮음",
-        "최근 폼": "최근 폼 불안정"
-    }
-
-    comment = comment_map.get(weakest, "")
-
-    return score, comment
+    return score, strengths[:3], major_risks, minor_risks
 
 
 # -----------------------------
-# 경고 생성
+# 다람쥐 상태
 # -----------------------------
 
-def generate_warnings(stats, recent_games):
-
-    warnings = []
-
-    total_games = stats["totalGames"]
-    win_rate = stats["totalWins"] / total_games
-    top3 = stats.get("top3", 0)
-    top5 = stats.get("top5", 0)
-    top7 = stats.get("top7", 0)
-
-    # 승률 위험
-    if total_games >= 50 and win_rate < 0.08:
-        warnings.append("낮은 승률")
-
-    # 조기사망 패턴
-    if total_games >= 50 and (top7 - top5) >= 0.25 and top3 <= 0.30:
-        warnings.append("중반 탈락 빈번")
-
-    # 최근 폼 급락
-    if recent_games:
-        avg_rank_recent = sum(g["gameRank"] for g in recent_games) / len(recent_games)
-        avg_damage_recent = sum(g["damageToPlayer"] for g in recent_games) / len(recent_games)
-
-        if avg_rank_recent > 6 and avg_damage_recent < 7000:
-            warnings.append("최근 폼 급락")
-
-    # 실험체 숙련도 낮음
-    char_stats = stats["characterStats"]
-    most_used = max(c["totalGames"] for c in char_stats)
-    if total_games >= 50 and most_used < 10:
-        warnings.append("주력 실험체 경험 부족")
-
-    return warnings
-
-
-# -----------------------------
-# 등급
-# -----------------------------
-
-def grade(score):
-    if score >= 85:
-        return "🟢 최고 좋음"
-    elif score >= 70:
-        return "🔵 좋음"
-    elif score >= 50:
-        return "🟡 보통"
-    elif score >= 35:
-        return "🟠 나쁨"
+def decide_squirrel(strengths, major_risks):
+    if len(major_risks) >= 2:
+        return "orange"
+    elif len(strengths) >= 2 and len(major_risks) <= 1:
+        return "purple"
     else:
-        return "🔴 닷지 권장"
+        return "green"
 
 
 # -----------------------------
-# 최종 평가 함수
+# 총평 생성 (줄바꿈 포함)
+# -----------------------------
+
+def generate_summary(strengths, major_risks, minor_risks, squirrel):
+
+    lines = []
+
+    # 위험형이면 장점 제외
+    if squirrel != "orange":
+        for i, s in enumerate(strengths):
+            if i == len(strengths) - 1 and (major_risks or minor_risks):
+                lines.append(s.replace("입니다.", "입니다. 하지만"))
+            else:
+                lines.append(s)
+
+    risks = major_risks + minor_risks
+    for r in risks:
+        lines.append(r)
+
+    return "\n".join(lines)
+
+
+# -----------------------------
+# 최종 평가
 # -----------------------------
 
 def evaluate_player(nickname):
@@ -232,47 +190,26 @@ def evaluate_player(nickname):
     season = get_rank_season_from_games(uid)
     stats = get_season_stats(uid, season)
     recent = get_recent_games(uid)
-    
-    score, comment = calculate_score(stats, recent)
-    warnings = generate_warnings(stats, recent)
 
     total_games = stats["totalGames"]
 
-    # 50판 미만이면 표본 부족 처리
     if total_games < 50:
-        warnings.append("표본 부족 (50판 미만)")
-        final_grade = "⚪ 표본 부족"
-    else:
-        final_grade = grade(score)
+        return {
+            "nickname": nickname,
+            "status": "sample",
+            "message": "표본 부족 (50판 미만)"
+        }
+
+    score, strengths, major_risks, minor_risks = calculate_score(stats, recent)
+    squirrel = decide_squirrel(strengths, major_risks)
+    summary = generate_summary(strengths, major_risks, minor_risks, squirrel)
 
     return {
         "nickname": nickname,
         "score": score,
-        "grade": final_grade,
-        "comment": comment,
-        "warnings": warnings,
-        "total_games": total_games
-        }
-
-
-
-# -----------------------------
-# CLI 테스트용
-# -----------------------------
-
-def run():
-    nick1 = input("팀원1 닉네임: ")
-    nick2 = input("팀원2 닉네임: ")
-
-    p1 = evaluate_player(nick1)
-    p2 = evaluate_player(nick2)
-
-    for p in [p1, p2]:
-        print(f"\n{p['nickname']}: {p['score']}점 → {p['grade']} ({p['comment']})")
-        if p["warnings"]:
-            print("경고:", ", ".join(p["warnings"]))
-
-
-if __name__ == "__main__":
-
-    run()
+        "squirrel": squirrel,
+        "strengths": strengths,
+        "major_risks": major_risks,
+        "minor_risks": minor_risks,
+        "summary": summary
+    }
