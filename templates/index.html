@@ -2,194 +2,237 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>띠아의 팀원 초상화</title>
+<title>띠아의 팔레트</title>
 
 <style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #111;
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    min-height: 100vh;
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#0f0f0f;
+    color:white;
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
 }
 
-.container {
-    width: 90%;
-    max-width: 800px;
-    text-align: center;
+header{
+    background:#181818;
+    padding:20px 40px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
 
-input {
-    width: 70%;
-    padding: 12px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: none;
+.logo{
+    font-size:22px;
+    font-weight:bold;
+    color:#b48cff;
 }
 
-button {
-    padding: 12px 20px;
-    margin-left: 10px;
-    border-radius: 8px;
-    border: none;
-    background: #6c5ce7;
-    color: white;
-    cursor: pointer;
+nav a{
+    color:#ccc;
+    text-decoration:none;
+    margin-left:20px;
 }
 
-.loading {
-    display: none;
-    margin-top: 30px;
+nav a:hover{ color:white; }
+
+main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:40px 20px;
+    text-align:center;
 }
 
-.result-card {
-    margin-top: 30px;
-    background: #222;
-    padding: 20px;
-    border-radius: 15px;
-    text-align: left;
+.main-text{
+    font-size:20px;
+    margin-bottom:10px;
 }
 
-.header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+.sub-text{
+    font-size:13px;
+    color:#888;
+    margin-bottom:25px;
 }
 
-.header img {
-    width: 80px;
+input{
+    width:300px;
+    padding:12px;
+    border-radius:8px;
+    border:none;
+    margin-bottom:15px;
 }
 
-.section {
-    margin-top: 15px;
+button{
+    padding:12px 20px;
+    border-radius:8px;
+    border:none;
+    background:#6c5ce7;
+    color:white;
+    cursor:pointer;
 }
 
-.summary {
-    margin-top: 15px;
-    white-space: pre-line;
-    background: #1b1b1b;
-    padding: 12px;
-    border-radius: 10px;
+button:hover{ background:#5a4bd6; }
+
+.loading{
+    display:none;
+    margin-top:20px;
+}
+
+.result-card{
+    background:#1a1a1a;
+    padding:20px;
+    border-radius:15px;
+    margin-top:30px;
+    width:90%;
+    max-width:600px;
+    text-align:left;
+}
+
+.center{text-align:center;}
+
+.squirrel-title{
+    margin-top:8px;
+    font-weight:bold;
+}
+
+.purple{ color:#b48cff; }
+.green{ color:#6ee7b7; }
+.orange{ color:#ff9f43; }
+
+.summary{
+    margin-top:15px;
+    font-weight:bold;
+    text-align:center;
+}
+
+footer{
+    background:#111;
+    padding:20px;
+    text-align:center;
+    font-size:12px;
+    color:#777;
 }
 </style>
 </head>
 
 <body>
-<div class="container">
 
-<h1>ER 팀원 브리핑</h1>
+<header>
+    <div class="logo">🎨 띠아의 팔레트</div>
+    <nav>
+        <a href="/">팀원 초상화</a>
+        <a href="/self">자화상</a>
+        <a href="/criteria">채점표</a>
+        <a href="https://naver.me/네이버폼링크" target="_blank">문의하기</a>
+    </nav>
+</header>
 
-<input type="text" id="nickInput" placeholder="닉네임1 닉네임2 (공백 , / 가능)">
-<button onclick="analyze()">분석</button>
+<main>
+
+<div class="main-text">
+팀원 닉네임을 입력하면,, 플레이 성향에 맞는 초상화를 그려줘,,!!
+</div>
+
+<div class="sub-text">
+( 스페이스바 , / 로 구분하면 자동으로 따로 검색해줘,,!! )
+</div>
+
+<input type="text" id="nickInput" placeholder="닉네임 입력">
+<button onclick="analyze()">초상화 완성하기</button>
 
 <div class="loading" id="loading">
-    <p>로딩중이야,,!!</p>
-    <img src="/tia-run.gif" width="120">
+<p>로딩중이야,,!!</p>
+<img src="/tia-run.gif" width="100">
 </div>
 
 <div id="results"></div>
 
-</div>
+</main>
+
+<footer>
+본 사이트는 님블뉴런 공식 Open API를 활용하며,
+님블뉴런 API 이용 규정을 준수합니다.
+</footer>
 
 <script>
-function parseNicknames(input) {
-    return input
-        .trim()
-        .split(/[ ,\/]+/)
-        .filter(n => n.length > 0)
-        .slice(0, 2);
+function parseNicknames(input){
+    return input.trim().split(/[ ,\/]+/).filter(n=>n.length>0).slice(0,2);
 }
 
-async function analyze() {
+async function analyze(){
 
-    const raw = document.getElementById("nickInput").value;
-    const nicks = parseNicknames(raw);
+    const raw=document.getElementById("nickInput").value;
+    const nicks=parseNicknames(raw);
+    if(nicks.length===0) return;
 
-    if (nicks.length === 0) {
-        alert("닉네임 입력해라");
-        return;
-    }
+    document.getElementById("loading").style.display="block";
+    document.getElementById("results").innerHTML="";
 
-    document.getElementById("loading").style.display = "block";
-    document.getElementById("results").innerHTML = "";
-
-    const response = await fetch("/analyze", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ nicknames: nicks })
+    const res=await fetch("/analyze",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({nicknames:nicks})
     });
 
-    const data = await response.json();
+    const data=await res.json();
+    document.getElementById("loading").style.display="none";
 
-    document.getElementById("loading").style.display = "none";
-
-    for (const nick of nicks) {
-        const result = data[nick];
-        if (!result) continue;
-
-        if (result.status === "sample") {
-            document.getElementById("results").innerHTML += `
-                <div class="result-card">
-                    <h2>${nick}</h2>
-                    <p>${result.message}</p>
-                </div>
-            `;
-            continue;
+    nicks.forEach(nick=>{
+        const r=data[nick];
+        if(!r || r.status==="sample"){
+            document.getElementById("results").innerHTML+=`
+                <div class="result-card center">
+                    ${nick}<br>표본 부족 (50판 미만)
+                </div>`;
+            return;
         }
 
-        let imgName = "squirrel_green.png";
-        if (result.squirrel === "purple") imgName = "squirrel_purple.png";
-        if (result.squirrel === "orange") imgName = "squirrel_orange.png";
+        let colorClass="green";
+        let stateText="기복형 팀원";
+        let summary="무난한것 같아,,,!!";
+        let imgName="squirrel_green.png";
 
-        let strengthsHtml = "";
-        if (result.squirrel !== "orange" && result.strengths.length > 0) {
-            strengthsHtml += "<div class='section'><h3>장점</h3>";
-            result.strengths.forEach(s => {
-                strengthsHtml += `<div>• ${s}</div>`;
-            });
-            strengthsHtml += "</div>";
+        if(r.squirrel==="purple"){
+            colorClass="purple";
+            stateText="안정형 팀원";
+            summary="좋은팀원이야,,,!!";
+            imgName="squirrel_purple.png";
+        }
+        if(r.squirrel==="orange"){
+            colorClass="orange";
+            stateText="위험 신호";
+            summary="어려운 게임이 될것같아,,,!!";
+            imgName="squirrel_orange.png";
         }
 
-        let risksHtml = "";
-        if (result.major_risks.length || result.minor_risks.length) {
-            risksHtml += "<div class='section'><h3>단점</h3>";
-            result.major_risks.forEach(r => {
-                risksHtml += `<div>• ${r}</div>`;
-            });
-            result.minor_risks.forEach(r => {
-                risksHtml += `<div>• ${r}</div>`;
-            });
-            risksHtml += "</div>";
-        }
-
-        document.getElementById("results").innerHTML += `
-            <div class="result-card">
-                <div class="header">
-                    <img src="/${imgName}">
-                    <div>
-                        <div style="font-size:20px;font-weight:bold;">${result.nickname}</div>
-                        <div>점수: ${result.score}</div>
-                    </div>
-                </div>
-                ${risksHtml}
-                ${strengthsHtml}
-                <div class="section">
-                    <h3>총평</h3>
-                    <div class="summary">${result.summary}</div>
-                </div>
+        let card=`
+        <div class="result-card">
+            <div class="center">
+                <img src="/${imgName}" width="100">
+                <div class="squirrel-title ${colorClass}">${stateText}</div>
+                <div style="margin-top:5px;">${r.nickname}</div>
             </div>
         `;
-    }
-}
 
-document.getElementById("nickInput")
-.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") analyze();
-});
+        if(r.squirrel!=="purple"){
+            card+=`<h4>단점</h4>`;
+            r.major_risks.forEach(x=> card+=`• ${x}<br>`);
+            r.minor_risks.forEach(x=> card+=`• ${x}<br>`);
+        }
+
+        if(r.squirrel!=="orange"){
+            card+=`<h4>장점</h4>`;
+            r.strengths.forEach(x=> card+=`• ${x}<br>`);
+        }
+
+        card+=`<div class="summary ${colorClass}">${summary}</div></div>`;
+
+        document.getElementById("results").innerHTML+=card;
+    });
+}
 </script>
 
 </body>
