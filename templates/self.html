@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>자화상 | 띠아의 팔레트</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#0f0f0f;
+    color:white;
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+}
+
+header{
+    background:#181818;
+    padding:20px 40px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-size:22px;
+    font-weight:bold;
+    color:#b48cff;
+}
+
+nav a{
+    color:#ccc;
+    text-decoration:none;
+    margin-left:20px;
+}
+
+nav a:hover{ color:white; }
+
+main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+
+input{
+    width:300px;
+    padding:12px;
+    border-radius:8px;
+    border:none;
+    margin-bottom:15px;
+}
+
+button{
+    padding:12px 20px;
+    border-radius:8px;
+    border:none;
+    background:#6c5ce7;
+    color:white;
+    cursor:pointer;
+}
+
+.loading{
+    display:none;
+    margin-top:20px;
+}
+
+footer{
+    background:#111;
+    padding:20px;
+    text-align:center;
+    font-size:12px;
+    color:#777;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">🎨 띠아의 팔레트</div>
+    <nav>
+        <a href="/">팀원 초상화</a>
+        <a href="/self">자화상</a>
+        <a href="/criteria">채점표</a>
+        <a href="https://naver.me/네이버폼링크" target="_blank">문의하기</a>
+    </nav>
+</header>
+
+<main>
+
+<p>내 닉네임을 입력하면,, 자화상을 그려줘,,!!</p>
+
+<input type="text" id="selfInput" placeholder="닉네임 입력">
+<button onclick="selfAnalyze()">자화상 완성하기</button>
+
+<div class="loading" id="selfLoading">
+<p>로딩중이야,,!!</p>
+<img src="/tia-run.gif" width="100">
+</div>
+
+<div id="selfResult"></div>
+
+</main>
+
+<footer>
+본 사이트는 님블뉴런 공식 Open API를 활용하며,
+님블뉴런 API 이용 규정을 준수합니다.
+</footer>
+
+<script>
+async function selfAnalyze(){
+    const nick=document.getElementById("selfInput").value.trim();
+    if(!nick) return;
+
+    document.getElementById("selfLoading").style.display="block";
+
+    const res=await fetch("/analyze",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({nicknames:[nick]})
+    });
+
+    const data=await res.json();
+    document.getElementById("selfLoading").style.display="none";
+
+    document.getElementById("selfResult").innerHTML=
+        "<p>자화상 결과는 팀원 초상화 페이지와 동일한 기준으로 출력됩니다.</p>";
+}
+</script>
+
+</body>
+</html>
