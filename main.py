@@ -5,13 +5,21 @@ import os
 app = Flask(__name__)
 
 # -----------------------------
-# 메인 페이지
+# 페이지 라우팅
 # -----------------------------
 
-@app.route("/", methods=["GET"])
+@app.route("/")
 def home():
     return render_template("index.html")
 
+@app.route("/self")
+def self_page():
+    return render_template("self.html")
+
+@app.route("/criteria")
+def criteria_page():
+    # 아직 페이지 없으면 나중에 추가
+    return "<h2>채점표 준비중</h2>"
 
 # -----------------------------
 # 분석 API
@@ -35,18 +43,19 @@ def analyze():
 
     return jsonify(results)
 
-
 # -----------------------------
-# templates 폴더 이미지 서빙
+# templates 폴더 이미지/파일 서빙
 # -----------------------------
 
 @app.route("/<path:filename>")
-def serve_file(filename):
-    return send_from_directory("templates", filename)
-
+def serve_template_file(filename):
+    try:
+        return send_from_directory("templates", filename)
+    except:
+        return "File not found", 404
 
 # -----------------------------
-# 실행
+# 실행 (Render 대응)
 # -----------------------------
 
 if __name__ == "__main__":
