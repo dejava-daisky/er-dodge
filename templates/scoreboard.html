@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>채점 기준 공개</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header>
+    <h1>띠아의 팔레트</h1>
+    <nav>
+        <a href="/">팀원 초상화</a>
+        <a href="/self">자화상</a>
+        <a href="/scoreboard">채점표</a>
+    </nav>
+</header>
+
+<div class="container">
+    <h2>📊 채점 기준 공개</h2>
+
+    <section>
+        <h3>평균 등수</h3>
+        <p>시즌 평균 등수를 기반으로 계산합니다.</p>
+        <ul>
+            <li>4.0 이하 → 15점</li>
+            <li>4.3 이하 → 12점</li>
+            <li>4.5 이하 → 8점</li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>승률</h3>
+        <p>총 승리 횟수 / 총 경기수</p>
+        <ul>
+            <li>18% 이상 → 20점</li>
+            <li>14% 이상 → 14점</li>
+            <li>10% 이상 → 8점</li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>TOP3 비율</h3>
+        <p>상위 3위 이내 진입 비율</p>
+    </section>
+
+    <section>
+        <h3>실험체 숙련도</h3>
+        <p>50판 이상 플레이한 유저 중, 특정 실험체 비율 40% 이상 여부를 검사합니다.</p>
+    </section>
+
+    <section>
+        <h3>최근 20경기 폼</h3>
+        <p>최근 경기 평균 등수와 평균 딜량을 기반으로 계산합니다.</p>
+    </section>
+
+    <section>
+        <h3>초반 사출 분석</h3>
+        <p>top7 - top5 비율 차이를 통해 초반 탈락 경향을 분석합니다.</p>
+    </section>
+</div>
+
+<footer>
+    <p>이 사이트는 님블뉴런 공식 Open API 규정을 따릅니다.</p>
+</footer>
+
+</body>
+</html>
