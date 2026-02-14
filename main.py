@@ -1,63 +1,72 @@
-from flask import Flask, request, render_template, jsonify, send_from_directory
+from flask import Flask, render_template, request
+from concurrent.futures import ThreadPoolExecutor
+import re
+
 from analyzer import evaluate_player
-import os
+from self_analyzer import evaluate_self_player
 
 app = Flask(__name__)
 
-# -----------------------------
-# 페이지 라우팅
-# -----------------------------
+# -------------------------------------------------
+# 닉네임 파서 (스페이스, 쉼표, 슬래시 대응)
+# -------------------------------------------------
+def parse_names(input_text):
+    if not input_text:
+        return []
 
-@app.route("/")
-def home():
-    return render_template("index.html")
+    names = re.split(r"[ ,/]+", input_text.strip())
+    return [n for n in names if n]
 
-@app.route("/self")
-def self_page():
-    return render_template("self.html")
 
-@app.route("/criteria")
-def criteria_page():
-    # 아직 페이지 없으면 나중에 추가
-    return "<h2>채점표 준비중</h2>"
+# -------------------------------------------------
+# 1️⃣ 팀원 초상화 (기본 빠른 분석)
+# -------------------------------------------------
+@app.route("/", methods=["GET", "POST"])
+def index():
 
-# -----------------------------
-# 분석 API
-# -----------------------------
+    results = None
 
-@app.post("/analyze")
-def analyze():
-    data = request.get_json()
-    nicks = data.get("nicknames", [])
+    if request.method == "POST":
+        raw_input = request.form.get("nickname")
+        names = parse_names(raw_input)
 
-    if not nicks or not isinstance(nicks, list):
-        return jsonify({"error": "nicknames 리스트를 보내세요"}), 400
+        if names:
+            # 병렬 처리 (2명 기준)
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                results = list(executor.map(evaluate_player, names))
 
-    results = {}
+    return render_template("index.html", results=results)
 
-    for nick in nicks:
-        try:
-            results[nick] = evaluate_player(nick)
-        except Exception as e:
-            results[nick] = {"error": str(e)}
 
-    return jsonify(results)
+# -------------------------------------------------
+# 2️⃣ 자화상 (확장 분석 전용)
+# -------------------------------------------------
+@app.route("/self", methods=["GET", "POST"])
+def self_portrait():
 
-# -----------------------------
-# templates 폴더 이미지/파일 서빙
-# -----------------------------
+    result = None
 
-@app.route("/<path:filename>")
-def serve_template_file(filename):
-    try:
-        return send_from_directory("templates", filename)
-    except:
-        return "File not found", 404
+    if request.method == "POST":
+        nickname = request.form.get("nickname")
 
-# -----------------------------
-# 실행 (Render 대응)
-# -----------------------------
+        if nickname:
+            result = evaluate_self_player(nickname)
 
+    return render_template("self.html", result=result)
+
+
+# -------------------------------------------------
+# 3️⃣ 채점표
+# -------------------------------------------------
+@app.route("/scoreboard")
+def scoreboard():
+    return render_template("scoreboard.html")
+
+
+# -------------------------------------------------
+# 실행
+# -------------------------------------------------
 if __name__ == "__main__":
+    import os
     port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
