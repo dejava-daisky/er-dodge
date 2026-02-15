@@ -125,7 +125,7 @@ footer{
     <nav>
         <a href="/">팀원 초상화</a>
         <a href="/self">자화상</a>
-        <a href="/criteria">채점표</a>
+        <a href="/scoreboard">채점표</a>
         <a href="https://naver.me/xNp300IW" target="_blank">문의하기</a>
     </nav>
 </header>
@@ -145,7 +145,7 @@ footer{
 
 <div class="loading" id="loading">
 <p>로딩중이야,,!!</p>
-<img src="/tia-run.gif" width="100">
+<img src="/assets/tia-run.gif" width="100">
 </div>
 
 <div id="results"></div>
@@ -158,11 +158,14 @@ footer{
 </footer>
 
 <script>
+
 function parseNicknames(input){
     return input.trim().split(/[ ,\/]+/).filter(n=>n.length>0).slice(0,2);
 }
 
 async function analyze(){
+
+    if(document.getElementById("loading").style.display==="block") return;
 
     const raw=document.getElementById("nickInput").value;
     const nicks=parseNicknames(raw);
@@ -182,6 +185,7 @@ async function analyze(){
 
     nicks.forEach(nick=>{
         const r=data[nick];
+
         if(!r || r.status==="sample"){
             document.getElementById("results").innerHTML+=`
                 <div class="result-card center">
@@ -211,7 +215,7 @@ async function analyze(){
         let card=`
         <div class="result-card">
             <div class="center">
-                <img src="/${imgName}" width="100">
+                <img src="/assets/${imgName}" width="100">
                 <div class="squirrel-title ${colorClass}">${stateText}</div>
                 <div style="margin-top:5px;">${r.nickname}</div>
             </div>
@@ -233,8 +237,17 @@ async function analyze(){
         document.getElementById("results").innerHTML+=card;
     });
 }
+
+/* 엔터 검색 */
+document.getElementById("nickInput")
+.addEventListener("keydown", function(e){
+    if(e.key==="Enter"){
+        e.preventDefault();
+        analyze();
+    }
+});
+
 </script>
 
 </body>
 </html>
-
