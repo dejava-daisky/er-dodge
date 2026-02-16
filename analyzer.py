@@ -1,6 +1,5 @@
 import requests
 import os
-import time
 
 BASE_URL = "https://open-api.bser.io"
 API_KEY = os.getenv("ER_API_KEY")
@@ -10,75 +9,69 @@ HEADERS = {
     "x-api-key": API_KEY
 }
 
-def safe_get(url):
-    try:
-        res = requests.get(url, headers=HEADERS, timeout=5)
-        if res.status_code != 200:
-            print("API FAIL:", res.status_code, url)
-            return None
-        return res.json()
-    except Exception as e:
-        print("API EX:", e)
+def api_get(path, params=None):
+    r = requests.get(BASE_URL + path, headers=HEADERS, params=params)
+    if r.status_code != 200:
         return None
+    return r.json()
 
-
-# ======================
+# ------------------
 # UID 조회
-# ======================
+# ------------------
 def get_user_uid(nickname):
-    url = f"{BASE_URL}/v1/user/nickname?query={nickname}"
-    data = safe_get(url)
+    data = api_get("/v1/user/nickname", {"query": nickname})
     if not data or "user" not in data:
         return None
     return data["user"]["userNum"]
 
-
-# ======================
+# ------------------
 # 최근 경기
-# ======================
+# ------------------
 def get_recent_games(uid, limit=20):
-    url = f"{BASE_URL}/v1/user/games/uid/{uid}"
-    data = safe_get(url)
+    data = api_get(f"/v1/user/games/uid/{uid}")
     if not data or "userGames" not in data:
         return []
     return data["userGames"][:limit]
 
-
-# ======================
+# ------------------
 # 점수 계산
-# ======================
+# ------------------
 def calculate_score(games):
-    if not games or len(games) < 5:
+    if len(games) < 5:
         return 0
 
-    avg_rank = sum(g["gameRank"] for g in games if g.get("gameRank")) / len(games)
-    score = int(100 - avg_rank * 5)
+    ranks = [g["gameRank"] for g in games if g.get("gameRank")]
+    if not ranks:
+        return 0
 
-    if score < 0:
-        score = 0
-    if score > 100:
-        score = 100
+    avg_rank = sum(ranks) / len(ranks)
+    score = int(100 - avg_rank * 6)
 
-    return score
+    return max(0, min(score, 100))
 
-
-# ======================
-# 종합 분석
-# ======================
-def analyze_player(nickname):
+# ------------------
+# 메인 평가
+# ------------------
+def evaluate_player(nickname):
     uid = get_user_uid(nickname)
     if not uid:
-        return {"error": "닉네임 없음"}
+        return {"status": "닉네임 없음"}
 
     games = get_recent_games(uid)
-
     if not games:
-        return {"error": "표본 부족"}
+        return {"status": "표본 부족"}
 
     score = calculate_score(games)
+
+    color = "orange"
+    if score >= 70:
+        color = "purple"
+    elif score >= 50:
+        color = "green"
 
     return {
         "nickname": nickname,
         "score": score,
+        "color": color,
         "games": len(games)
     }
