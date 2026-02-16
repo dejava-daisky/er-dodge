@@ -2,21 +2,20 @@ import requests
 import os
 import time
 
-API_KEY = os.getenv("ER_API_KEY")
 BASE_URL = "https://open-api.bser.io"
+API_KEY = os.getenv("ER_API_KEY")
 
 HEADERS = {
     "accept": "application/json",
     "x-api-key": API_KEY
 }
 
-
 # =========================
-# 안전 요청 함수
+# 안전 GET
 # =========================
-def safe_get(url):
+def safe_get(url, params=None):
     try:
-        res = requests.get(url, headers=HEADERS, timeout=5)
+        res = requests.get(url, headers=HEADERS, params=params, timeout=5)
         print("API:", res.status_code, url)
 
         if res.status_code != 200:
@@ -30,25 +29,24 @@ def safe_get(url):
 
 
 # =========================
-# 시즌 자동 감지
+# 시즌 (fallback 구조)
 # =========================
-def get_current_season():
+CURRENT_SEASON = 29  # 실패 시 이 값 사용
+
+def get_current_season_safe():
     url = f"{BASE_URL}/v1/game/season"
     data = safe_get(url)
     if data and "seasonId" in data:
         return data["seasonId"]
-    return 29   # fallback
-
-
-CURRENT_SEASON = get_current_season()
+    return CURRENT_SEASON
 
 
 # =========================
 # UID 조회
 # =========================
 def get_uid(nickname):
-    url = f"{BASE_URL}/v1/user/nickname?query={nickname}"
-    data = safe_get(url)
+    url = f"{BASE_URL}/v1/user/nickname"
+    data = safe_get(url, params={"query": nickname})
 
     if not data or "user" not in data:
         return None
@@ -57,10 +55,11 @@ def get_uid(nickname):
 
 
 # =========================
-# 시즌 전적 조회
+# 시즌 전적
 # =========================
 def get_season_stats(uid):
-    url = f"{BASE_URL}/v2/user/stats/uid/{uid}/{CURRENT_SEASON}/3"
+    season = get_current_season_safe()
+    url = f"{BASE_URL}/v2/user/stats/uid/{uid}/{season}/3"
     data = safe_get(url)
 
     if not data or "userStats" not in data:
@@ -70,7 +69,38 @@ def get_season_stats(uid):
 
 
 # =========================
-# 평가 메인
+# 최근 경기 (self_analyzer용)
+# =========================
+def get_recent_games(uid, limit=20):
+    try:
+        url = f"{BASE_URL}/v1/user/games/{uid}"
+        data = safe_get(url)
+
+        if not data or "userGames" not in data:
+            return []
+
+        games = data["userGames"][:limit]
+
+        result = []
+        for g in games:
+            result.append({
+                "gameId": g.get("gameId"),
+                "seasonId": g.get("seasonId"),
+                "characterNum": g.get("characterNum"),
+                "rank": g.get("gameRank"),
+                "mmr": g.get("mmr"),
+                "mode": g.get("matchingMode")
+            })
+
+        return result
+
+    except Exception as e:
+        print("recent fail:", e)
+        return []
+
+
+# =========================
+# 메인 평가
 # =========================
 def evaluate_player(nickname):
     uid = get_uid(nickname)
@@ -116,40 +146,3 @@ def evaluate_player(nickname):
         "totalGames": total_games,
         "winRate": win_rate
     }
-
-# =========================
-# 최근 경기 조회 (self_analyzer용)
-# =========================
-def get_recent_games(uid, limit=20):
-    """
-    최근 경기 기록을 간단 리스트로 반환
-    실패 시 빈 리스트 반환 (서버 죽지 않게)
-    """
-    try:
-        # 최근 매치 ID 목록
-        url = f"{BASE_URL}/v1/user/games/{uid}"
-        data = safe_get(url)
-
-        if not data or "userGames" not in data:
-            return []
-
-        games = data["userGames"][:limit]
-
-        # 필요한 최소 정보만 정리
-        result = []
-        for g in games:
-            result.append({
-                "gameId": g.get("gameId"),
-                "seasonId": g.get("seasonId"),
-                "characterNum": g.get("characterNum"),
-                "rank": g.get("gameRank"),
-                "mmr": g.get("mmr"),
-                "gameMode": g.get("matchingMode"),
-                "createdAt": g.get("startDtm")
-            })
-
-        return result
-
-    except Exception as e:
-        print("recent games fail:", e)
-        return []
