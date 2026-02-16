@@ -75,3 +75,5 @@ def evaluate_player(nickname):
         "color": color,
         "games": len(games)
     }
+
+analyze_player = evaluate_player
