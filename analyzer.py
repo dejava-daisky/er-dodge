@@ -116,3 +116,40 @@ def evaluate_player(nickname):
         "totalGames": total_games,
         "winRate": win_rate
     }
+
+# =========================
+# 최근 경기 조회 (self_analyzer용)
+# =========================
+def get_recent_games(uid, limit=20):
+    """
+    최근 경기 기록을 간단 리스트로 반환
+    실패 시 빈 리스트 반환 (서버 죽지 않게)
+    """
+    try:
+        # 최근 매치 ID 목록
+        url = f"{BASE_URL}/v1/user/games/{uid}"
+        data = safe_get(url)
+
+        if not data or "userGames" not in data:
+            return []
+
+        games = data["userGames"][:limit]
+
+        # 필요한 최소 정보만 정리
+        result = []
+        for g in games:
+            result.append({
+                "gameId": g.get("gameId"),
+                "seasonId": g.get("seasonId"),
+                "characterNum": g.get("characterNum"),
+                "rank": g.get("gameRank"),
+                "mmr": g.get("mmr"),
+                "gameMode": g.get("matchingMode"),
+                "createdAt": g.get("startDtm")
+            })
+
+        return result
+
+    except Exception as e:
+        print("recent games fail:", e)
+        return []
