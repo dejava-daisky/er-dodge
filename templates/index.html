@@ -235,6 +235,10 @@ async function analyze(){
         card+=`<div class="summary ${colorClass}">${summary}</div></div>`;
 
         document.getElementById("results").innerHTML+=card;
+
+        if (data.warning) {
+          resultArea.innerHTML += "<p style='color:orange'>" + data.warning + "</p>";
+        }
     });
 }
 
@@ -251,3 +255,4 @@ document.getElementById("nickInput")
 
 </body>
 </html>
+
