@@ -146,3 +146,26 @@ def evaluate_player(nickname):
         "totalGames": total_games,
         "winRate": win_rate
     }
+# =========================
+# 점수 계산 (self_analyzer용)
+# =========================
+def calculate_score(win_rate, total_games):
+    """
+    self_analyzer에서 호출하는 점수 계산 함수
+    서버 죽지 않게 매우 단순 구조
+    """
+    try:
+        if total_games < 5:
+            return 0
+
+        score = int(win_rate * 100)
+
+        if score > 100:
+            score = 100
+        if score < 0:
+            score = 0
+
+        return score
+
+    except:
+        return 0
