@@ -6,114 +6,59 @@
 
 <style>
 body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    background:#0f0f0f;
-    color:white;
-    display:flex;
-    flex-direction:column;
-    min-height:100vh;
+  background:#111;
+  color:white;
+  font-family:sans-serif;
+  text-align:center;
+  margin:0;
 }
-
 header{
-    background:#181818;
-    padding:20px 40px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+  background:#1a1a1a;
+  padding:16px;
 }
-
 .logo{
-    font-size:22px;
-    font-weight:bold;
-    color:#b48cff;
+  font-size:20px;
+  margin-bottom:8px;
 }
-
 nav a{
-    color:#ccc;
-    text-decoration:none;
-    margin-left:20px;
+  color:#ccc;
+  margin:0 8px;
+  text-decoration:none;
 }
-
 nav a:hover{ color:white; }
 
-main{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:40px 20px;
-    text-align:center;
-}
+main{ padding:24px; }
 
-.main-text{
-    font-size:20px;
-    margin-bottom:10px;
-}
-
-.sub-text{
-    font-size:13px;
-    color:#888;
-    margin-bottom:25px;
-}
+.main-text{ font-size:20px; margin-bottom:8px; }
+.sub-text{ color:#aaa; margin-bottom:16px; }
 
 input{
-    width:300px;
-    padding:12px;
-    border-radius:8px;
-    border:none;
-    margin-bottom:15px;
+  padding:10px;
+  width:260px;
 }
-
 button{
-    padding:12px 20px;
-    border-radius:8px;
-    border:none;
-    background:#6c5ce7;
-    color:white;
-    cursor:pointer;
-}
-
-button:hover{ background:#5a4bd6; }
-
-.loading{
-    display:none;
-    margin-top:20px;
+  padding:10px;
+  margin-left:6px;
 }
 
 .result-card{
-    background:#1a1a1a;
-    padding:20px;
-    border-radius:15px;
-    margin-top:30px;
-    width:90%;
-    max-width:600px;
-    text-align:left;
+  border:1px solid #444;
+  margin:12px auto;
+  padding:12px;
+  border-radius:10px;
+  max-width:360px;
 }
+.center{ text-align:center; }
+.warning{ color:orange; }
 
-.center{text-align:center;}
-
-.squirrel-title{
-    margin-top:8px;
-    font-weight:bold;
-}
-
-.purple{ color:#b48cff; }
-.green{ color:#6ee7b7; }
-.orange{ color:#ff9f43; }
-
-.summary{
-    margin-top:15px;
-    font-weight:bold;
-    text-align:center;
-}
+.loading{ display:none; margin-top:16px; }
 
 footer{
-    background:#111;
-    padding:20px;
-    text-align:center;
-    font-size:12px;
-    color:#777;
+  margin-top:40px;
+  padding:16px;
+  color:#777;
+  font-size:12px;
+  border-top:1px solid #222;
 }
 </style>
 </head>
@@ -158,101 +103,91 @@ footer{
 </footer>
 
 <script>
+const input = document.getElementById("nickInput");
+input.addEventListener("keydown", e=>{
+  if(e.key==="Enter") analyze();
+});
 
-function parseNicknames(input){
-    return input.trim().split(/[ ,\/]+/).filter(n=>n.length>0).slice(0,2);
+function splitNicknames(text){
+  return text.split(/[ ,/]+/).filter(v=>v.trim()!=="");
 }
 
 async function analyze(){
+  const raw = input.value.trim();
+  if(!raw) return;
 
-    if(document.getElementById("loading").style.display==="block") return;
+  const names = splitNicknames(raw);
+  const resultArea = document.getElementById("results");
+  const loading = document.getElementById("loading");
 
-    const raw=document.getElementById("nickInput").value;
-    const nicks=parseNicknames(raw);
-    if(nicks.length===0) return;
+  resultArea.innerHTML="";
+  loading.style.display="block";
 
-    document.getElementById("loading").style.display="block";
-    document.getElementById("results").innerHTML="";
-
-    const res=await fetch("/analyze",{
+  for(const nick of names){
+    try{
+      const res = await fetch("/analyze",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({nicknames:nicks})
-    });
+        body:JSON.stringify({nickname:nick})
+      });
 
-    const data=await res.json();
-    document.getElementById("loading").style.display="none";
+      const r = await res.json();
 
-    nicks.forEach(nick=>{
-        const r=data[nick];
+      if(!r || r.status){
+        resultArea.innerHTML += `
+          <div class="result-card center">
+            ${nick}<br>${r?.status || "검색 실패"}
+          </div>`;
+        continue;
+      }
 
-        if(!r || r.status==="sample"){
-            document.getElementById("results").innerHTML+=`
-                <div class="result-card center">
-                    ${nick}<br>표본 부족 (50판 미만)
-                </div>`;
-            return;
-        }
+      // 색상 총평
+      let comment="어려운 게임이 될 것 같아,,,!!";
+      if(r.color==="purple") comment="좋은 팀원이야,,,!!";
+      else if(r.color==="green") comment="무난한 것 같아,,,!!";
 
-        let colorClass="green";
-        let stateText="기복형 팀원";
-        let summary="무난한것 같아,,,!!";
-        let imgName="squirrel_green.png";
+      // 기본 카드
+      resultArea.innerHTML += `
+        <div class="result-card center">
+          닉네임: ${r.nickname}<br>
+          점수: ${r.score}<br>
+          최근 경기: ${r.recentGames}판<br>
+          전체 경기: ${r.totalGames}판
+        </div>`;
 
-        if(r.squirrel==="purple"){
-            colorClass="purple";
-            stateText="안정형 팀원";
-            summary="좋은팀원이야,,,!!";
-            imgName="squirrel_purple.png";
-        }
-        if(r.squirrel==="orange"){
-            colorClass="orange";
-            stateText="위험 신호";
-            summary="어려운 게임이 될것같아,,,!!";
-            imgName="squirrel_orange.png";
-        }
+      // 50판 문구 유지 (차단 아님)
+      if(r.totalGames < 50){
+        resultArea.innerHTML += `
+          <div class="result-card center">
+            표본 부족 (50판 미만)
+          </div>`;
+      }
 
-        let card=`
-        <div class="result-card">
-            <div class="center">
-                <img src="/assets/${imgName}" width="100">
-                <div class="squirrel-title ${colorClass}">${stateText}</div>
-                <div style="margin-top:5px;">${r.nickname}</div>
-            </div>
-        `;
+      // 총평
+      resultArea.innerHTML += `
+        <div class="result-card center">
+          ${comment}
+        </div>`;
 
-        if(r.squirrel!=="purple"){
-            card+=`<h4>단점</h4>`;
-            r.major_risks.forEach(x=> card+=`• ${x}<br>`);
-            r.minor_risks.forEach(x=> card+=`• ${x}<br>`);
-        }
+      // 경고 병행
+      if(r.warning){
+        resultArea.innerHTML += `
+          <div class="result-card warning">
+            ${r.warning}
+          </div>`;
+      }
 
-        if(r.squirrel!=="orange"){
-            card+=`<h4>장점</h4>`;
-            r.strengths.forEach(x=> card+=`• ${x}<br>`);
-        }
-
-        card+=`<div class="summary ${colorClass}">${summary}</div></div>`;
-
-        document.getElementById("results").innerHTML+=card;
-
-        if (data.warning) {
-          resultArea.innerHTML += "<p style='color:orange'>" + data.warning + "</p>";
-        }
-    });
-}
-
-/* 엔터 검색 */
-document.getElementById("nickInput")
-.addEventListener("keydown", function(e){
-    if(e.key==="Enter"){
-        e.preventDefault();
-        analyze();
+    }catch(e){
+      resultArea.innerHTML += `
+        <div class="result-card center">
+          ${nick}<br>검색 실패
+        </div>`;
     }
-});
+  }
 
+  loading.style.display="none";
+}
 </script>
 
 </body>
 </html>
-
