@@ -103,91 +103,53 @@ footer{
 </footer>
 
 <script>
-const input = document.getElementById("nickInput");
-input.addEventListener("keydown", e=>{
-  if(e.key==="Enter") analyze();
-});
+function makeResultCard(r){
+  let img="";
+  let comment="";
+  let showStrength=true;
+  let showRisk=true;
 
-function splitNicknames(text){
-  return text.split(/[ ,/]+/).filter(v=>v.trim()!=="");
-}
-
-async function analyze(){
-  const raw = input.value.trim();
-  if(!raw) return;
-
-  const names = splitNicknames(raw);
-  const resultArea = document.getElementById("results");
-  const loading = document.getElementById("loading");
-
-  resultArea.innerHTML="";
-  loading.style.display="block";
-
-  for(const nick of names){
-    try{
-      const res = await fetch("/analyze",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({nickname:nick})
-      });
-
-      const r = await res.json();
-
-      if(!r || r.status){
-        resultArea.innerHTML += `
-          <div class="result-card center">
-            ${nick}<br>${r?.status || "검색 실패"}
-          </div>`;
-        continue;
-      }
-
-      // 색상 총평
-      let comment="어려운 게임이 될 것 같아,,,!!";
-      if(r.color==="purple") comment="좋은 팀원이야,,,!!";
-      else if(r.color==="green") comment="무난한 것 같아,,,!!";
-
-      // 기본 카드
-      resultArea.innerHTML += `
-        <div class="result-card center">
-          닉네임: ${r.nickname}<br>
-          점수: ${r.score}<br>
-          최근 경기: ${r.recentGames}판<br>
-          전체 경기: ${r.totalGames}판
-        </div>`;
-
-      // 50판 문구 유지 (차단 아님)
-      if(r.totalGames < 50){
-        resultArea.innerHTML += `
-          <div class="result-card center">
-            표본 부족 (50판 미만)
-          </div>`;
-      }
-
-      // 총평
-      resultArea.innerHTML += `
-        <div class="result-card center">
-          ${comment}
-        </div>`;
-
-      // 경고 병행
-      if(r.warning){
-        resultArea.innerHTML += `
-          <div class="result-card warning">
-            ${r.warning}
-          </div>`;
-      }
-
-    }catch(e){
-      resultArea.innerHTML += `
-        <div class="result-card center">
-          ${nick}<br>검색 실패
-        </div>`;
-    }
+  if(r.score>=70){
+    img="/static/squirrel_purple.png";
+    comment="좋은 팀원이야,,,!!";
+    showRisk=false;
+  }
+  else if(r.score<=50){
+    img="/static/squirrel_orange.png";
+    comment="어려운 게임이 될 것 같아,,,!!";
+    showStrength=false;
+  }
+  else{
+    img="/static/squirrel_green.png";
+    comment="무난한 것 같아,,,!!";
   }
 
-  loading.style.display="none";
+  let html=`
+  <div class="result-card center">
+    <img src="${img}" width="120"><br>
+    <b>${r.nickname}</b><br>
+    ${r.totalGames}판 / ${r.mostChar||"?"}(${r.mostCharGames||0}판)
+  </div>
+  `;
+
+  if(showStrength && r.strengths && r.strengths.length){
+    html+=`<div class="result-card"><b>장점</b><ul>`;
+    r.strengths.forEach(s=> html+=`<li>${s}</li>`);
+    html+=`</ul></div>`;
+  }
+
+  if(showRisk && r.major_risks && r.major_risks.length){
+    html+=`<div class="result-card"><b>단점</b><ul>`;
+    r.major_risks.forEach(s=> html+=`<li>${s}</li>`);
+    html+=`</ul></div>`;
+  }
+
+  html+=`<div class="result-card center">${comment}</div>`;
+
+  return html;
 }
 </script>
 
 </body>
 </html>
+
