@@ -103,53 +103,37 @@ footer{
 </footer>
 
 <script>
-function makeResultCard(r){
+function makeCard(r){
   let img="";
   let comment="";
-  let showStrength=true;
-  let showRisk=true;
 
-  if(r.score>=70){
+  if(r.color==="purple"){
     img="/static/squirrel_purple.png";
-    comment="좋은 팀원이야,,,!!";
-    showRisk=false;
+    comment="좋은 팀원이야,,!!";
   }
-  else if(r.score<=50){
-    img="/static/squirrel_orange.png";
-    comment="어려운 게임이 될 것 같아,,,!!";
-    showStrength=false;
+  else if(r.color==="green"){
+    img="/static/squirrel_green.png";
+    comment="무난한 팀원 같아,,!!";
   }
   else{
-    img="/static/squirrel_green.png";
-    comment="무난한 것 같아,,,!!";
+    img="/static/squirrel_orange.png";
+    comment="조금 어려울 수도 있어,,!!";
   }
 
-  let html=`
+  return `
   <div class="result-card center">
     <img src="${img}" width="120"><br>
     <b>${r.nickname}</b><br>
-    ${r.totalGames}판 / ${r.mostChar||"?"}(${r.mostCharGames||0}판)
+    ${r.games}판 / 캐릭터 ${r.mostChar} (${r.mostCharGames}판)
   </div>
+  ${r.strength ? `<div class="result-card">강점: ${r.strength}</div>` : ""}
+  ${r.weakness ? `<div class="result-card">약점: ${r.weakness}</div>` : ""}
+  <div class="result-card center">${comment}</div>
   `;
-
-  if(showStrength && r.strengths && r.strengths.length){
-    html+=`<div class="result-card"><b>장점</b><ul>`;
-    r.strengths.forEach(s=> html+=`<li>${s}</li>`);
-    html+=`</ul></div>`;
-  }
-
-  if(showRisk && r.major_risks && r.major_risks.length){
-    html+=`<div class="result-card"><b>단점</b><ul>`;
-    r.major_risks.forEach(s=> html+=`<li>${s}</li>`);
-    html+=`</ul></div>`;
-  }
-
-  html+=`<div class="result-card center">${comment}</div>`;
-
-  return html;
 }
 </script>
 
 </body>
 </html>
+
 
