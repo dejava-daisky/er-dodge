@@ -11,29 +11,63 @@ HEADERS = {
 }
 
 def api_get(path, params=None):
-    r = requests.get(BASE_URL + path, headers=HEADERS, params=params, timeout=5)
-    if r.status_code != 200:
-        return None
-    return r.json()
+    r = requests.get(
+        BASE_URL + path,
+        headers=HEADERS,
+        params=params,
+        timeout=5
+    )
 
+    if r.status_code != 200:
+        print("HTTP ERROR:", r.status_code, r.text)
+        return None
+
+    data = r.json()
+
+    # 내부 code 검사
+    if data.get("code") != 200:
+        print("API ERROR:", data)
+        return None
+
+    return data
+
+
+# -------------------------
+# UID 조회
+# -------------------------
 def get_uid(nickname):
     data = api_get("/v1/user/nickname", {"query": nickname})
     if not data or "user" not in data:
         return None
-    return data["user"].get("uid")
 
+    return data["user"].get("userId")   # 🔥 수정 완료
+
+
+# -------------------------
+# 최근 경기
+# -------------------------
 def get_recent_games(uid, limit=20):
     data = api_get(f"/v1/user/games/uid/{uid}")
     if not data or "userGames" not in data:
         return []
+
     return data["userGames"][:limit]
 
+
+# -------------------------
+# 시즌 통계
+# -------------------------
 def get_season_stats(uid, season_id):
     data = api_get(f"/v2/user/stats/uid/{uid}/{season_id}/3")
     if not data or "userStats" not in data:
         return None
+
     return data["userStats"][0]
 
+
+# -------------------------
+# 점수 계산
+# -------------------------
 def calc_score_and_comment(stats):
     if not stats:
         return 0, "", ""
@@ -52,10 +86,10 @@ def calc_score_and_comment(stats):
     strength = ""
     weakness = ""
 
-    win_rate = wins / total
-    top3_rate = top3 / total
+    win_rate = wins / total if total else 0
+    top3_rate = top3 / total if total else 0
     team_kill = avg_kill + avg_assist
-    diff = (top7 - top5) / total if total > 0 else 0
+    diff = (top7 - top5) / total if total else 0
 
     # 승률
     if win_rate >= 0.15: score += 10
@@ -91,7 +125,7 @@ def calc_score_and_comment(stats):
     elif diff <= 0.05: score += 10
     elif diff <= 0.10: score += 5
 
-    # 강점 선정
+    # 강점
     if avg_rank <= 3.8:
         strength = "평균 등수가 안정적입니다."
     elif avg_dmg >= 15000:
@@ -99,7 +133,7 @@ def calc_score_and_comment(stats):
     elif team_kill >= 8:
         strength = "교전 참여도가 준수합니다."
 
-    # 약점 선정
+    # 약점
     if diff > 0.10:
         weakness = "중하위권 탈락이 잦습니다."
     elif top3_rate < 0.43:
@@ -109,6 +143,10 @@ def calc_score_and_comment(stats):
 
     return score, strength, weakness
 
+
+# -------------------------
+# 최종 평가
+# -------------------------
 def evaluate_player(nickname):
     uid = get_uid(nickname)
     if not uid:
