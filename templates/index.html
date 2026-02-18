@@ -81,6 +81,10 @@ function analyze(){
     return res.json();
   })
   .then(data=>{
+    console.log("서버응답:", data);
+    document.getElementById("resultArea").innerHTML = makeCard(data);
+  })
+  .then(data=>{
     document.getElementById("resultArea").innerHTML = makeCard(data);
   })
   .catch(e=>{
@@ -108,6 +112,7 @@ function makeCard(r){
 
 </body>
 </html>
+
 
 
 
