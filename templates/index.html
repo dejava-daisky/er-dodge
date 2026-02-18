@@ -80,23 +80,24 @@ function analyze(){
     body: JSON.stringify({nickname:nick})
   })
   .then(res=>{
+    console.log("status:",res.status);
     if(!res.ok){
-      throw new Error("서버 오류");
+      throw new Error("서버 에러");
     }
     return res.json();
-  })
+})
   .then(data=>{
-    document.getElementById("resultArea").innerHTML = makeCard(data);
-  })
-  .then(data=>{
-  console.log(data);
+    console.log("data:",data);
+    if(!data){
+      alert("데이터 없음");
+      return;
+    }
   document.getElementById("resultArea").innerHTML = makeCard(data);
-  })
+})
   .catch(err=>{
     console.error(err);
     alert("검색 실패");
-  });
-}
+});
 
 function makeCard(r){
   let img="";
@@ -132,4 +133,5 @@ function makeCard(r){
 
 </body>
 </html>
+
 
