@@ -1,95 +1,52 @@
 from analyzer import (
     get_uid,
-    get_season_stats,
     get_recent_games,
-    calculate_score
+    get_season_stats,
+    calc_score_and_comment
 )
-from character_map import CHARACTER_MAP
+from collections import Counter
 
-
-# -----------------------------
-# 최근 50경기 기반 실험체 분석
-# -----------------------------
-def analyze_team_synergy(uid, recent_games_count=50):
-
-    games = get_recent_games(uid, recent_games_count)
-
-    synergy = {}
-
-    for game in games:
-        rank = game["gameRank"]
-
-        for member in game.get("teamUser", []):
-            if member.get("userNum") == uid:
-                continue
-
-            char_code = member.get("characterNum")
-            if not char_code:
-                continue
-
-            if char_code not in synergy:
-                synergy[char_code] = {
-                    "games": 0,
-                    "total_rank": 0,
-                    "wins": 0
-                }
-
-            synergy[char_code]["games"] += 1
-            synergy[char_code]["total_rank"] += rank
-
-            if rank == 1:
-                synergy[char_code]["wins"] += 1
-
-    result = []
-
-    for char, data in synergy.items():
-        if data["games"] < 5:
-            continue
-
-        avg_rank = data["total_rank"] / data["games"]
-        win_rate = data["wins"] / data["games"]
-
-        result.append({
-            "character": CHARACTER_MAP.get(char, f"코드{char}"),
-            "games": data["games"],
-            "avg_rank": round(avg_rank, 2),
-            "win_rate": round(win_rate * 100, 1)
-        })
-
-    if not result:
-        return [], []
-
-    # 평균등수 안정적 상위 2
-    stable = sorted(result, key=lambda x: x["avg_rank"])[:2]
-
-    # 승률 높은 상위 2
-    high_win = sorted(result, key=lambda x: x["win_rate"], reverse=True)[:2]
-
-    return stable, high_win
-
-
-# -----------------------------
-# 자화상 종합 분석
-# -----------------------------
 def evaluate_self_player(nickname):
-
     uid = get_uid(nickname)
+    if not uid:
+        return {"status": "닉네임 없음"}
 
-    # 시즌은 analyzer 내부 로직과 동일하게 처리
-    season_id = get_recent_games(uid)[0]["seasonId"]
+    games = get_recent_games(uid, 50)
+    if not games:
+        return {"status": "전적 없음"}
+
+    season_id = next((g["seasonId"] for g in games if g.get("seasonId")), None)
     stats = get_season_stats(uid, season_id)
-    recent = get_recent_games(uid, 10)
 
-    score, strengths, major_risks, minor_risks = calculate_score(stats, recent)
+    score, strength, weakness = calc_score_and_comment(stats)
 
-    stable_chars, high_win_chars = analyze_team_synergy(uid)
+    # 모스트 캐릭터
+    chars = [g["characterNum"] for g in games if g.get("characterNum")]
+    counter = Counter(chars)
+    most_char, most_cnt = counter.most_common(1)[0]
+
+    # 최근 10판 평균 등수
+    recent_ranks = [g["gameRank"] for g in games[:10] if g.get("gameRank")]
+    recent_avg_rank = sum(recent_ranks) / len(recent_ranks) if recent_ranks else 0
+
+    season_avg_rank = stats.get("averageRank", 0)
+
+    # 퍼센트 변환 (장인 비교용 더미 기준)
+    percent_rank = min(100, int((3.2 / season_avg_rank) * 100)) if season_avg_rank else 0
+    percent_damage = min(100, int(stats.get("averageDamage",0) / 18000 * 100))
+    percent_team = min(100, int((stats.get("averageKill",0)+stats.get("averageAssist",0)) / 12 * 100))
 
     return {
         "nickname": nickname,
         "score": score,
-        "strengths": strengths,
-        "major_risks": major_risks,
-        "minor_risks": minor_risks,
-        "stable_chars": stable_chars,
-        "high_win_chars": high_win_chars
+        "games": stats.get("totalGames", 0),
+        "mostChar": most_char,
+        "mostCharGames": most_cnt,
+        "strength": strength,
+        "weakness": weakness,
+        "recentAvgRank": round(recent_avg_rank,2),
+        "seasonAvgRank": season_avg_rank,
+        "percentRank": percent_rank,
+        "percentDamage": percent_damage,
+        "percentTeam": percent_team
     }
