@@ -88,6 +88,10 @@ function analyze(){
   .then(data=>{
     document.getElementById("resultArea").innerHTML = makeCard(data);
   })
+  .then(data=>{
+  console.log(data);
+  document.getElementById("resultArea").innerHTML = makeCard(data);
+  })
   .catch(err=>{
     console.error(err);
     alert("검색 실패");
@@ -128,3 +132,4 @@ function makeCard(r){
 
 </body>
 </html>
+
