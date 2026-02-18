@@ -2,108 +2,98 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>띠아의 팔레트</title>
-
+<title>팀원 초상화</title>
 <style>
 body{
-  background:#111;
-  color:white;
-  font-family:sans-serif;
-  text-align:center;
   margin:0;
+  font-family:Arial;
+  background:#0f0f0f;
+  color:white;
 }
 header{
-  background:#1a1a1a;
-  padding:16px;
+  background:#181818;
+  padding:20px 40px;
 }
 .logo{
-  font-size:20px;
-  margin-bottom:8px;
+  font-size:22px;
+  color:#b48cff;
+  font-weight:bold;
 }
-nav a{
-  color:#ccc;
-  margin:0 8px;
-  text-decoration:none;
+main{
+  max-width:900px;
+  margin:auto;
+  padding:30px;
+  text-align:center;
 }
-nav a:hover{ color:white; }
-
-main{ padding:24px; }
-
-.main-text{ font-size:20px; margin-bottom:8px; }
-.sub-text{ color:#aaa; margin-bottom:16px; }
-
 input{
   padding:10px;
-  width:260px;
+  width:220px;
+  border-radius:8px;
+  border:none;
 }
 button{
-  padding:10px;
-  margin-left:6px;
+  padding:10px 15px;
+  border:none;
+  border-radius:8px;
+  background:#7b5cff;
+  color:white;
+  cursor:pointer;
 }
-
 .result-card{
-  border:1px solid #444;
-  margin:12px auto;
-  padding:12px;
-  border-radius:10px;
-  max-width:360px;
+  background:#1a1a1a;
+  padding:20px;
+  border-radius:15px;
+  margin-top:15px;
 }
-.center{ text-align:center; }
-.warning{ color:orange; }
-
-.loading{ display:none; margin-top:16px; }
-
-footer{
-  margin-top:40px;
-  padding:16px;
-  color:#777;
-  font-size:12px;
-  border-top:1px solid #222;
-}
+.center{text-align:center;}
 </style>
 </head>
 
 <body>
 
 <header>
-    <div class="logo">🎨 띠아의 팔레트</div>
-    <nav>
-        <a href="/">팀원 초상화</a>
-        <a href="/self">자화상</a>
-        <a href="/scoreboard">채점표</a>
-        <a href="https://naver.me/xNp300IW" target="_blank">문의하기</a>
-    </nav>
+<div class="logo">🎨 띠아의 팔레트</div>
 </header>
 
 <main>
 
-<div class="main-text">
-팀원 닉네임을 입력하면,, 플레이 성향에 맞는 초상화를 그려줘,,!!
-</div>
-
-<div class="sub-text">
-( 스페이스바 , / 로 구분하면 자동으로 따로 검색해줘,,!! )
-</div>
+<h2>팀원 초상화 만들기</h2>
 
 <input type="text" id="nickInput" placeholder="닉네임 입력">
-<button onclick="analyze()">초상화 완성하기</button>
+<button type="button" onclick="analyze()">초상화 완성하기</button>
 
-<div class="loading" id="loading">
-<p>로딩중이야,,!!</p>
-<img src="/assets/tia-run.gif" width="100">
-</div>
-
-<div id="results"></div>
 <div id="resultArea"></div>
-  
+
 </main>
 
-<footer>
-본 사이트는 님블뉴런 공식 Open API를 활용하며,
-님블뉴런 API 이용 규정을 준수합니다.
-</footer>
-
 <script>
+function analyze(){
+  const nick = document.getElementById("nickInput").value;
+  if(!nick){
+    alert("닉네임을 입력하세요");
+    return;
+  }
+
+  fetch("/analyze",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({nickname:nick})
+  })
+  .then(res=>{
+    if(!res.ok){
+      throw new Error("서버 오류");
+    }
+    return res.json();
+  })
+  .then(data=>{
+    document.getElementById("resultArea").innerHTML = makeCard(data);
+  })
+  .catch(err=>{
+    console.error(err);
+    alert("검색 실패");
+  });
+}
+
 function makeCard(r){
   let img="";
   let comment="";
@@ -127,33 +117,14 @@ function makeCard(r){
     <b>${r.nickname}</b><br>
     ${r.games}판 / 캐릭터 ${r.mostChar} (${r.mostCharGames}판)
   </div>
+
   ${r.strength ? `<div class="result-card">강점: ${r.strength}</div>` : ""}
   ${r.weakness ? `<div class="result-card">약점: ${r.weakness}</div>` : ""}
+
   <div class="result-card center">${comment}</div>
   `;
-
-  function analyze(){
-  const nick = document.getElementById("nickInput").value;
-
-  fetch("/analyze",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({nickname:nick})
-  })
-  .then(res=>res.json())
-  .then(data=>{
-    const area = document.getElementById("resultArea");
-    area.innerHTML = makeCard(data);
-  })
-  .catch(e=>{
-    console.error(e);
-  });
-}
 }
 </script>
 
 </body>
 </html>
-
-
-
