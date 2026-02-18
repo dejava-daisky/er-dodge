@@ -69,10 +69,7 @@ button{
 <script>
 function analyze(){
   const nick = document.getElementById("nickInput").value;
-  if(!nick){
-    alert("닉네임을 입력하세요");
-    return;
-  }
+  if(!nick){ alert("닉네임 입력"); return; }
 
   fetch("/analyze",{
     method:"POST",
@@ -80,58 +77,37 @@ function analyze(){
     body: JSON.stringify({nickname:nick})
   })
   .then(res=>{
-    console.log("status:",res.status);
-    if(!res.ok){
-      throw new Error("서버 에러");
-    }
+    if(!res.ok) throw new Error("서버에러");
     return res.json();
-})
+  })
   .then(data=>{
-    console.log("data:",data);
-    if(!data){
-      alert("데이터 없음");
-      return;
-    }
-  document.getElementById("resultArea").innerHTML = makeCard(data);
-})
-  .catch(err=>{
-    console.error(err);
+    document.getElementById("resultArea").innerHTML = makeCard(data);
+  })
+  .catch(e=>{
+    console.error(e);
     alert("검색 실패");
-});
+  });
+}
 
 function makeCard(r){
-  let img="";
-  let comment="";
+  if(!r) return "<div>데이터 없음</div>";
 
-  if(r.color==="purple"){
-    img="/static/squirrel_purple.png";
-    comment="좋은 팀원이야,,!!";
-  }
-  else if(r.color==="green"){
-    img="/static/squirrel_green.png";
-    comment="무난한 팀원 같아,,!!";
-  }
-  else{
-    img="/static/squirrel_orange.png";
-    comment="조금 어려울 수도 있어,,!!";
-  }
+  let img="";
+  if(r.color==="purple") img="/static/squirrel_purple.png";
+  else if(r.color==="green") img="/static/squirrel_green.png";
+  else img="/static/squirrel_orange.png";
 
   return `
   <div class="result-card center">
     <img src="${img}" width="120"><br>
     <b>${r.nickname}</b><br>
     ${r.games}판 / 캐릭터 ${r.mostChar} (${r.mostCharGames}판)
-  </div>
-
-  ${r.strength ? `<div class="result-card">강점: ${r.strength}</div>` : ""}
-  ${r.weakness ? `<div class="result-card">약점: ${r.weakness}</div>` : ""}
-
-  <div class="result-card center">${comment}</div>
-  `;
+  </div>`;
 }
 </script>
 
 </body>
 </html>
+
 
 
