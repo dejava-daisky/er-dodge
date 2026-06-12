@@ -162,7 +162,7 @@ function calculateScore(stats, recentGames) {
               ? 7
               : 4;
   }
-  breakdown.set("주력 캐릭터 숙련도", [focusScore, 10]);
+  breakdown.set("캐릭터 집중도", [focusScore, 10]);
   score += focusScore;
 
   let averageRecentRank = null;
@@ -231,7 +231,7 @@ function calculateScore(stats, recentGames) {
     "평균 순위": "평균 순위가 아쉽습니다.",
     "승률": "승률이 낮습니다.",
     "상위권 진입": "상위권 진입 비율이 낮습니다.",
-    "주력 캐릭터 숙련도": "주력 캐릭터 숙련도가 부족합니다.",
+    "캐릭터 집중도": "캐릭터 사용 성향이 점수에 반영됐습니다.",
     "최근 폼": "최근 경기력이 불안합니다.",
     "시야·정찰 활동": "최근 시야·정찰 활동이 부족합니다.",
     "위험 감점": "닷지를 고려할 위험 지표가 감지됐습니다.",
@@ -242,11 +242,17 @@ function calculateScore(stats, recentGames) {
     maxScore: maximum,
     isPenalty: label === "위험 감점",
   }));
-  return [
-    score,
-    score >= 80 ? "전반적인 지표가 안정적입니다." : comments[weakest],
-    scoreBreakdown,
-  ];
+  let comment = score >= 80 ? "전반적인 지표가 안정적입니다." : comments[weakest];
+  if (score < 80 && weakest === "캐릭터 집중도") {
+    if (totalGames < 50) {
+      comment = "표본이 적어 캐릭터 성향을 판단하기 어렵습니다.";
+    } else if (mostUsedRatio > 0.6) {
+      comment = "한 캐릭터를 고집하는 원챔 성향입니다.";
+    } else if (mostUsedRatio < 0.15) {
+      comment = "여러 캐릭터를 이것저것 사용하는 성향입니다.";
+    }
+  }
+  return [score, comment, scoreBreakdown];
 }
 
 function generateWarnings(stats, recentGames) {
@@ -277,8 +283,8 @@ function generateWarnings(stats, recentGames) {
   const mostUsed = Math.max(
     ...stats.characterStats.map((character) => Number(character.totalGames) || 0),
   );
-  if (totalGames < 50) warnings.push("숙련도를 확인할 수 없습니다");
-  else if (mostUsed < 10) warnings.push("주력 캐릭터 경험 부족");
+  if (totalGames < 50) warnings.push("캐릭터 성향 데이터 부족");
+  else if (mostUsed < 10) warnings.push("뚜렷한 주력 캐릭터 없음");
   return warnings;
 }
 
