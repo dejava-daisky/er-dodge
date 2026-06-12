@@ -1516,7 +1516,9 @@
             </div>
         `;
         try {
-            const response = await fetch(`/api/patches/characters/${encodeURIComponent(characterName)}`);
+            const response = await fetch(
+                `/.netlify/functions/patch-character?name=${encodeURIComponent(characterName)}`
+            );
             const data = await response.json();
             if (!response.ok) {
                 throw new Error(data.error || "캐릭터 패치 내역을 불러오지 못했습니다.");
