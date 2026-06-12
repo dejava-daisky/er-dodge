@@ -1,0 +1,445 @@
+{
+  "characters": {
+    "가넷": {
+      "resource": "Garnet",
+      "thumbnail": "/static/characters/Garnet_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Garnet_Mini.png"
+    },
+    "나딘": {
+      "resource": "Nadine",
+      "thumbnail": "/static/characters/Nadine_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Nadine_Mini.png"
+    },
+    "나타폰": {
+      "resource": "Nathapon",
+      "thumbnail": "/static/characters/Nathapon_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Nathapon_Mini.png"
+    },
+    "니아": {
+      "resource": "Niah",
+      "thumbnail": "/static/characters/Niah_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Niah_Mini.png"
+    },
+    "니키": {
+      "resource": "Nicky",
+      "thumbnail": "/static/characters/Nicky_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Nicky_Mini.png"
+    },
+    "다니엘": {
+      "resource": "Daniel",
+      "thumbnail": "/static/characters/Daniel_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Daniel_Mini.png"
+    },
+    "다르코": {
+      "resource": "Darko",
+      "thumbnail": "/static/characters/Darko_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Darko_Mini.png"
+    },
+    "데비&마를렌": {
+      "resource": "DebiMarlene",
+      "thumbnail": "/static/characters/Debi_&_Marlene_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Debi & Marlene_Mini.png"
+    },
+    "띠아": {
+      "resource": "Tia",
+      "thumbnail": "/static/characters/Tia_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Tia_Mini.png"
+    },
+    "라우라": {
+      "resource": "Laura",
+      "thumbnail": "/static/characters/Laura_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Laura_Mini.png"
+    },
+    "레녹스": {
+      "resource": "Lenox",
+      "thumbnail": "/static/characters/Lenox_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Lenox_Mini.png"
+    },
+    "레니": {
+      "resource": "Leni",
+      "thumbnail": "/static/characters/Leni_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Leni_Mini.png"
+    },
+    "레온": {
+      "resource": "Leon",
+      "thumbnail": "/static/characters/Leon_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Leon_Mini.png"
+    },
+    "로지": {
+      "resource": "Rozzi",
+      "thumbnail": "/static/characters/Rozzi_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Rozzi_Mini.png"
+    },
+    "루크": {
+      "resource": "Luke",
+      "thumbnail": "/static/characters/Luke_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Luke_Mini.png"
+    },
+    "르노어": {
+      "resource": "Lenore",
+      "thumbnail": "/static/characters/Lenore_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Lenore_Mini.png"
+    },
+    "리 다이린": {
+      "resource": "LiDailin",
+      "thumbnail": "/static/characters/Li_Dailin_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Li Dailin_Mini.png"
+    },
+    "리오": {
+      "resource": "Rio",
+      "thumbnail": "/static/characters/Rio_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Rio_Mini.png"
+    },
+    "마르티나": {
+      "resource": "Martina",
+      "thumbnail": "/static/characters/Martina_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Martina_Mini.png"
+    },
+    "마이": {
+      "resource": "Mai",
+      "thumbnail": "/static/characters/Mai_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Mai_Mini.png"
+    },
+    "마커스": {
+      "resource": "Markus",
+      "thumbnail": "/static/characters/Markus_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Markus_Mini.png"
+    },
+    "매그너스": {
+      "resource": "Magnus",
+      "thumbnail": "/static/characters/Magnus_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Magnus_Mini.png"
+    },
+    "미르카": {
+      "resource": "Mirka",
+      "thumbnail": "/static/characters/Mirka_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Mirka_Mini.png"
+    },
+    "바냐": {
+      "resource": "Vanya",
+      "thumbnail": "/static/characters/Vanya_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Vanya_Mini.png"
+    },
+    "바바라": {
+      "resource": "Barbara",
+      "thumbnail": "/static/characters/Barbara_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Barbara_Mini.png"
+    },
+    "버니스": {
+      "resource": "Bernice",
+      "thumbnail": "/static/characters/Bernice_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Bernice_Mini.png"
+    },
+    "블레어": {
+      "resource": "Blair",
+      "thumbnail": "/static/characters/Blair_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Blair_Mini.png"
+    },
+    "비앙카": {
+      "resource": "Bianca",
+      "thumbnail": "/static/characters/Bianca_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Bianca_Mini.png"
+    },
+    "비형": {
+      "resource": "Bihyung",
+      "thumbnail": "/static/characters/Bihyung_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Bihyung_Mini.png"
+    },
+    "샬럿": {
+      "resource": "Charlotte",
+      "thumbnail": "/static/characters/Charlotte_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Charlotte_Mini.png"
+    },
+    "셀린": {
+      "resource": "Celine",
+      "thumbnail": "/static/characters/Celine_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Celine_Mini.png"
+    },
+    "쇼우": {
+      "resource": "Xiukai",
+      "thumbnail": "/static/characters/Xiukai_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Xiukai_Mini.png"
+    },
+    "쇼이치": {
+      "resource": "Shoichi",
+      "thumbnail": "/static/characters/Shoichi_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Shoichi_Mini.png"
+    },
+    "수아": {
+      "resource": "Sua",
+      "thumbnail": "/static/characters/Sua_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Sua_Mini.png"
+    },
+    "슈린": {
+      "resource": "Xuelin",
+      "thumbnail": "/static/characters/Xuelin_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Xuelin_Mini.png"
+    },
+    "시셀라": {
+      "resource": "Sissela",
+      "thumbnail": "/static/characters/Sissela_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Sissela_Mini.png"
+    },
+    "실비아": {
+      "resource": "Silvia",
+      "thumbnail": "/static/characters/Silvia_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Silvia_Mini.png"
+    },
+    "아델라": {
+      "resource": "Adela",
+      "thumbnail": "/static/characters/Adela_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Adela_Mini.png"
+    },
+    "아드리아나": {
+      "resource": "Adriana",
+      "thumbnail": "/static/characters/Adriana_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Adriana_Mini.png"
+    },
+    "아디나": {
+      "resource": "Adina",
+      "thumbnail": "/static/characters/Adina_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Adina_Mini.png"
+    },
+    "아르다": {
+      "resource": "Arda",
+      "thumbnail": "/static/characters/Arda_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Arda_Mini.png"
+    },
+    "아비게일": {
+      "resource": "Abigail",
+      "thumbnail": "/static/characters/Abigail_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Abigail_Mini.png"
+    },
+    "아야": {
+      "resource": "Aya",
+      "thumbnail": "/static/characters/Aya_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Aya_Mini.png"
+    },
+    "아이솔": {
+      "resource": "Isol",
+      "thumbnail": "/static/characters/Isol_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Isol_Mini.png"
+    },
+    "아이작": {
+      "resource": "Isaac",
+      "thumbnail": "/static/characters/Isaac_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Isaac_Mini.png"
+    },
+    "알렉스": {
+      "resource": "Alex",
+      "thumbnail": "/static/characters/Alex_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Alex_Mini.png"
+    },
+    "알론소": {
+      "resource": "Alonso",
+      "thumbnail": "/static/characters/Alonso_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Alonso_Mini.png"
+    },
+    "얀": {
+      "resource": "Jan",
+      "thumbnail": "/static/characters/Jan_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Jan_Mini.png"
+    },
+    "에스텔": {
+      "resource": "Estelle",
+      "thumbnail": "/static/characters/Estelle_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Estelle_Mini.png"
+    },
+    "에이든": {
+      "resource": "Aiden",
+      "thumbnail": "/static/characters/Aiden_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Aiden_Mini.png"
+    },
+    "에키온": {
+      "resource": "Echion",
+      "thumbnail": "/static/characters/Echion_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Echion_Mini.png"
+    },
+    "엘레나": {
+      "resource": "Elena",
+      "thumbnail": "/static/characters/Elena_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Elena_Mini.png"
+    },
+    "엠마": {
+      "resource": "Emma",
+      "thumbnail": "/static/characters/Emma_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Emma_Mini.png"
+    },
+    "요한": {
+      "resource": "Johann",
+      "thumbnail": "/static/characters/Johann_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Johann_Mini.png"
+    },
+    "윌리엄": {
+      "resource": "William",
+      "thumbnail": "/static/characters/William_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:William_Mini.png"
+    },
+    "유민": {
+      "resource": "YuMin",
+      "thumbnail": "/static/characters/Yumin_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Yumin_Mini.png"
+    },
+    "유스티나": {
+      "resource": "Justyna",
+      "thumbnail": "/static/characters/Justyna_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Justyna_Mini.png"
+    },
+    "유키": {
+      "resource": "Yuki",
+      "thumbnail": "/static/characters/Yuki_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Yuki_Mini.png"
+    },
+    "이렘": {
+      "resource": "Irem",
+      "thumbnail": "/static/characters/Irem_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Irem_Mini.png"
+    },
+    "이바": {
+      "resource": "Eva",
+      "thumbnail": "/static/characters/Eva_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Eva_Mini.png"
+    },
+    "이슈트반": {
+      "resource": "Istvan",
+      "thumbnail": "/static/characters/Istvan_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Istvan_Mini.png"
+    },
+    "이안": {
+      "resource": "Lyanh",
+      "thumbnail": "/static/characters/Ly_Anh_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Ly Anh_Mini.png"
+    },
+    "일레븐": {
+      "resource": "Eleven",
+      "thumbnail": "/static/characters/Eleven_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Eleven_Mini.png"
+    },
+    "자히르": {
+      "resource": "Zahir",
+      "thumbnail": "/static/characters/Zahir_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Zahir_Mini.png"
+    },
+    "재키": {
+      "resource": "Jackie",
+      "thumbnail": "/static/characters/Jackie_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Jackie_Mini.png"
+    },
+    "제니": {
+      "resource": "Jenny",
+      "thumbnail": "/static/characters/Jenny_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Jenny_Mini.png"
+    },
+    "츠바메": {
+      "resource": "Tsubame",
+      "thumbnail": "/static/characters/Tsubame_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Tsubame_Mini.png"
+    },
+    "카밀로": {
+      "resource": "Camilo",
+      "thumbnail": "/static/characters/Camilo_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Camilo_Mini.png"
+    },
+    "카티야": {
+      "resource": "Katja",
+      "thumbnail": "/static/characters/Katja_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Katja_Mini.png"
+    },
+    "칼라": {
+      "resource": "Karla",
+      "thumbnail": "/static/characters/Karla_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Karla_Mini.png"
+    },
+    "캐시": {
+      "resource": "Cathy",
+      "thumbnail": "/static/characters/Cathy_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Cathy_Mini.png"
+    },
+    "케네스": {
+      "resource": "Kenneth",
+      "thumbnail": "/static/characters/Kenneth_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Kenneth_Mini.png"
+    },
+    "코렐라인": {
+      "resource": "Coraline",
+      "thumbnail": "/static/characters/Coraline_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Coraline_Mini.png"
+    },
+    "클로에": {
+      "resource": "Chloe",
+      "thumbnail": "/static/characters/Chloe_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Chloe_Mini.png"
+    },
+    "키아라": {
+      "resource": "Chiara",
+      "thumbnail": "/static/characters/Chiara_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Chiara_Mini.png"
+    },
+    "타지아": {
+      "resource": "Tazia",
+      "thumbnail": "/static/characters/Tazia_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Tazia_Mini.png"
+    },
+    "테오도르": {
+      "resource": "Theodore",
+      "thumbnail": "/static/characters/Theodore_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Theodore_Mini.png"
+    },
+    "펜리르": {
+      "resource": "Fenrir",
+      "thumbnail": "/static/characters/Fenrir_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Fenrir_Mini.png"
+    },
+    "펠릭스": {
+      "resource": "Felix",
+      "thumbnail": "/static/characters/Felix_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Felix_Mini.png"
+    },
+    "프리야": {
+      "resource": "Priya",
+      "thumbnail": "/static/characters/Priya_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Priya_Mini.png"
+    },
+    "피오라": {
+      "resource": "Fiora",
+      "thumbnail": "/static/characters/Fiora_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Fiora_Mini.png"
+    },
+    "피올로": {
+      "resource": "Piolo",
+      "thumbnail": "/static/characters/Piolo_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Piolo_Mini.png"
+    },
+    "하트": {
+      "resource": "Hart",
+      "thumbnail": "/static/characters/Hart_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Hart_Mini.png"
+    },
+    "헤이즈": {
+      "resource": "Haze",
+      "thumbnail": "/static/characters/Haze_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Haze_Mini.png"
+    },
+    "헨리": {
+      "resource": "Henry",
+      "thumbnail": "/static/characters/Henry_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Henry_Mini.png"
+    },
+    "현우": {
+      "resource": "Hyunwoo",
+      "thumbnail": "/static/characters/Hyunwoo_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Hyunwoo_Mini.png"
+    },
+    "혜진": {
+      "resource": "Hyejin",
+      "thumbnail": "/static/characters/Hyejin_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Hyejin_Mini.png"
+    },
+    "히스이": {
+      "resource": "Hisui",
+      "thumbnail": "/static/characters/Hisui_Mini.png",
+      "source": "https://eternalreturn.fandom.com/wiki/File:Hisui_Mini.png"
+    }
+  },
+  "missing": []
+}

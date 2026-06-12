@@ -1,0 +1,1797 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ER Dodge Check</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #090a0d;
+            --surface: #111319;
+            --surface-2: #171a21;
+            --line: #292d36;
+            --line-bright: #3b414d;
+            --text: #f1f3f6;
+            --muted: #858b96;
+            --green: #55e39b;
+            --yellow: #ffc45c;
+            --red: #ff5d6c;
+            --white: #f7f8fa;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text);
+            font-family: Inter, Pretendard, "Noto Sans KR", system-ui, sans-serif;
+            background:
+                linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+                var(--bg);
+            background-size: 32px 32px;
+        }
+
+        button, input { font: inherit; }
+        [hidden] { display: none !important; }
+
+        .shell {
+            width: min(1180px, calc(100% - 36px));
+            margin: 0 auto;
+            padding: 28px 0 48px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 54px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-mark {
+            display: grid;
+            width: 36px;
+            height: 36px;
+            place-items: center;
+            border: 1px solid var(--line-bright);
+            color: var(--green);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            background: var(--surface-2);
+            transform: skew(-7deg);
+        }
+
+        .brand-copy strong {
+            display: block;
+            font-size: 14px;
+            letter-spacing: 0.08em;
+        }
+
+        .brand-copy span,
+        .top-note {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-tabs {
+            display: flex;
+            border: 1px solid var(--line);
+            background: #0c0e12;
+        }
+
+        .view-tab,
+        .dialog-close {
+            border: 0;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 850;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        .view-tab {
+            min-height: 34px;
+            padding: 0 13px;
+        }
+
+        .view-tab.active {
+            color: #08130d;
+            background: var(--green);
+        }
+
+        .dialog-close:hover { color: var(--white); }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 260px;
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .main-panel,
+        .team-panel {
+            border: 1px solid var(--line);
+            background: rgba(17, 19, 25, 0.96);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 58px;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .panel-title {
+            margin: 0;
+            font-size: 13px;
+            letter-spacing: 0.08em;
+        }
+
+        .step {
+            color: var(--muted);
+            font: 700 10px ui-monospace, SFMono-Regular, Consolas, monospace;
+            letter-spacing: 0.08em;
+        }
+
+        .search-form { padding: 18px; }
+
+        .fields {
+            display: grid;
+            grid-template-columns: 1fr 36px 1fr 132px;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .versus {
+            display: grid;
+            place-items: center;
+            color: #545a65;
+            font: 900 11px ui-monospace, SFMono-Regular, Consolas, monospace;
+        }
+
+        .field { position: relative; }
+
+        label {
+            position: absolute;
+            top: 9px;
+            left: 13px;
+            color: var(--muted);
+            font: 800 9px ui-monospace, SFMono-Regular, Consolas, monospace;
+            letter-spacing: 0.12em;
+        }
+
+        input {
+            width: 100%;
+            height: 58px;
+            padding: 24px 13px 7px;
+            border: 1px solid var(--line);
+            border-radius: 0;
+            outline: none;
+            color: var(--white);
+            font-weight: 750;
+            background: #0c0e12;
+            transition: border-color 140ms, background 140ms;
+        }
+
+        input:hover { border-color: var(--line-bright); }
+        input:focus {
+            border-color: var(--green);
+            background: #10141a;
+        }
+
+        .submit-button {
+            position: relative;
+            border: 0;
+            color: #07130d;
+            font-size: 13px;
+            font-weight: 900;
+            cursor: pointer;
+            background: var(--green);
+            transition: filter 140ms, transform 140ms;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            filter: brightness(1.08);
+            transform: translateY(-1px);
+        }
+
+        .submit-button:disabled {
+            color: var(--muted);
+            cursor: wait;
+            background: #252932;
+        }
+
+        .form-error {
+            min-height: 19px;
+            margin: 10px 0 -4px;
+            color: var(--red);
+            font-size: 12px;
+        }
+
+        .status-line {
+            display: none;
+            align-items: center;
+            gap: 9px;
+            margin: 0 18px 18px;
+            padding: 10px 12px;
+            border-left: 2px solid var(--yellow);
+            color: #bdc2ca;
+            font: 700 11px ui-monospace, SFMono-Regular, Consolas, monospace;
+            background: rgba(255, 196, 92, 0.05);
+        }
+
+        .status-line.visible { display: flex; }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--yellow);
+            box-shadow: 0 0 12px var(--yellow);
+            animation: blink 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes blink { to { opacity: 0.25; } }
+
+        .result-area {
+            min-height: 394px;
+            padding: 0 18px 18px;
+        }
+
+        .empty-state {
+            display: grid;
+            min-height: 376px;
+            place-items: center;
+            border: 1px dashed #272b33;
+            color: #575d68;
+            text-align: center;
+        }
+
+        .empty-state strong {
+            display: block;
+            margin-bottom: 7px;
+            color: #6e7581;
+            font-size: 13px;
+            letter-spacing: 0.05em;
+        }
+
+        .empty-state span { font-size: 12px; }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .results:has(.player-card:only-child) {
+            grid-template-columns: 1fr;
+        }
+
+        .player-card {
+            --signal: var(--muted);
+            position: relative;
+            min-height: 376px;
+            padding: 22px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            background: linear-gradient(145deg, #181b22, #111319 60%);
+        }
+
+        .player-card::before {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            content: "";
+            background: var(--signal);
+        }
+
+        .card-index {
+            color: var(--muted);
+            font: 800 10px ui-monospace, SFMono-Regular, Consolas, monospace;
+            letter-spacing: 0.1em;
+        }
+
+        .card-main {
+            display: grid;
+            grid-template-columns: 122px minmax(0, 1fr);
+            gap: 24px;
+            align-items: center;
+            margin-top: 22px;
+        }
+
+        .traffic-signal {
+            display: flex;
+            width: 122px;
+            height: 176px;
+            padding: 15px 20px;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            border: 7px solid #08090c;
+            outline: 1px solid #343945;
+            background: linear-gradient(145deg, #11141a, #07080b);
+            box-shadow:
+                inset 0 0 24px rgba(0, 0, 0, 0.9),
+                0 10px 26px rgba(0, 0, 0, 0.28);
+        }
+
+        .signal-light {
+            width: 42px;
+            height: 42px;
+            border: 3px solid #050608;
+            border-radius: 50%;
+            opacity: 0.24;
+            box-shadow: inset 0 0 13px rgba(0, 0, 0, 0.82);
+            transition: opacity 180ms, filter 180ms, box-shadow 180ms;
+        }
+
+        .signal-red { background: var(--red); }
+        .signal-yellow { background: var(--yellow); }
+        .signal-green { background: var(--green); }
+
+        .signal-dodge .signal-red,
+        .signal-caution .signal-yellow,
+        .signal-proceed .signal-green {
+            opacity: 1;
+            filter: saturate(1.15) brightness(1.12);
+        }
+
+        .signal-dodge .signal-red {
+            box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.25), 0 0 22px var(--red);
+        }
+
+        .signal-caution .signal-yellow {
+            box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.25), 0 0 22px var(--yellow);
+        }
+
+        .signal-proceed .signal-green {
+            box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.25), 0 0 22px var(--green);
+        }
+
+        .player-name {
+            margin: 7px 0 20px;
+            overflow: hidden;
+            font-size: clamp(19px, 2.2vw, 27px);
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .score {
+            color: var(--signal);
+            font: 900 clamp(42px, 5vw, 68px)/0.9 ui-monospace, SFMono-Regular, Consolas, monospace;
+            letter-spacing: -0.08em;
+        }
+
+        .score small {
+            margin-left: 4px;
+            color: var(--muted);
+            font-size: 11px;
+            letter-spacing: 0;
+        }
+
+        .grade {
+            margin-top: 14px;
+            color: var(--signal);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+        }
+
+        .comment {
+            min-height: 23px;
+            margin: 28px 0 0;
+            padding-top: 18px;
+            border-top: 1px solid var(--line);
+            color: #b8bdc6;
+            font-size: 13px;
+        }
+
+        .warnings {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 13px;
+        }
+
+        .warning {
+            padding: 5px 8px;
+            border: 1px solid rgba(255, 93, 108, 0.24);
+            color: #ff9ba5;
+            font-size: 10px;
+            font-weight: 800;
+            background: rgba(255, 93, 108, 0.06);
+        }
+
+        .error-card {
+            display: grid;
+            align-content: center;
+            border-color: rgba(255, 93, 108, 0.35);
+        }
+
+        .error-card .player-name { white-space: normal; }
+        .error-message { color: #ff9ba5; font-size: 13px; line-height: 1.65; }
+
+        .team-panel {
+            position: sticky;
+            top: 18px;
+            align-self: start;
+        }
+
+        .team-body { padding: 22px; }
+
+        .team-signal {
+            --team-color: #4d535e;
+            display: flex;
+            width: 100%;
+            aspect-ratio: 1 / 1.17;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+            justify-content: center;
+            border: 8px solid #08090c;
+            outline: 1px solid var(--line-bright);
+            background: linear-gradient(145deg, #11141a, #07080b);
+            box-shadow: inset 0 0 45px rgba(0, 0, 0, 0.88);
+        }
+
+        .team-signal .signal-light {
+            width: 62px;
+            height: 62px;
+        }
+
+        .team-result {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .team-result span {
+            color: var(--muted);
+            font: 800 9px ui-monospace, SFMono-Regular, Consolas, monospace;
+            letter-spacing: 0.15em;
+        }
+
+        .team-result strong {
+            display: block;
+            margin-top: 8px;
+            color: var(--team-color, #6e7581);
+            font-size: 23px;
+            letter-spacing: -0.03em;
+        }
+
+        .team-result p {
+            min-height: 36px;
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        .legend {
+            display: grid;
+            gap: 9px;
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid var(--line);
+        }
+
+        .legend-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .legend-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-light {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--light);
+            box-shadow: 0 0 8px color-mix(in srgb, var(--light) 65%, transparent);
+        }
+
+        .my-view {
+            margin-top: 18px;
+            border: 1px solid var(--line);
+            background: rgba(17, 19, 25, 0.96);
+        }
+
+        .my-form {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 132px;
+            gap: 10px;
+            padding: 18px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .my-form .form-error { grid-column: 1 / -1; }
+        .my-result { min-height: 420px; padding: 18px; }
+
+        .my-dashboard {
+            --signal: var(--green);
+            display: grid;
+            grid-template-columns: 240px minmax(0, 1fr);
+            gap: 18px;
+        }
+
+        .raw-dashboard {
+            grid-template-columns: 1fr;
+        }
+
+        .my-record-header {
+            padding: 20px;
+            border: 1px solid var(--line);
+            background: #0d0f14;
+        }
+
+        .my-record-header span {
+            color: var(--muted);
+            font: 800 9px ui-monospace, SFMono-Regular, Consolas, monospace;
+            letter-spacing: 0.12em;
+        }
+
+        .my-record-header h2 {
+            margin: 9px 0 0;
+            font-size: 24px;
+        }
+
+        .my-score-panel,
+        .metric-card {
+            border: 1px solid var(--line);
+            background: #0d0f14;
+        }
+
+        .my-score-panel {
+            display: grid;
+            min-height: 330px;
+            padding: 24px;
+            align-content: center;
+            text-align: center;
+        }
+
+        .my-score-panel .traffic-signal {
+            margin: 0 auto 24px;
+        }
+
+        .my-score-panel h2 {
+            margin: 0 0 12px;
+            overflow: hidden;
+            font-size: 22px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .my-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .metric-card {
+            min-height: 132px;
+            padding: 17px;
+        }
+
+        .metric-card span {
+            color: var(--muted);
+            font: 800 9px ui-monospace, SFMono-Regular, Consolas, monospace;
+            letter-spacing: 0.1em;
+        }
+
+        .metric-card strong {
+            display: block;
+            margin-top: 18px;
+            color: var(--white);
+            font: 900 28px ui-monospace, SFMono-Regular, Consolas, monospace;
+            letter-spacing: -0.06em;
+        }
+
+        .metric-card small {
+            display: block;
+            margin-top: 8px;
+            color: #626975;
+            font-size: 10px;
+        }
+
+        .my-summary {
+            grid-column: 1 / -1;
+            min-height: auto;
+        }
+
+        .my-summary strong {
+            color: var(--signal);
+            font-family: inherit;
+            font-size: 18px;
+            letter-spacing: 0;
+        }
+
+        .score-receipt {
+            position: relative;
+            width: min(560px, 100%);
+            margin: 24px auto 4px;
+            padding: 28px 30px 30px;
+            color: #171717;
+            font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+            background: #eee9dc;
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32);
+        }
+
+        .score-receipt::before,
+        .score-receipt::after {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            content: "";
+            background:
+                linear-gradient(135deg, transparent 5px, #eee9dc 0) 0 0 / 10px 10px repeat-x;
+        }
+
+        .score-receipt::before {
+            top: -8px;
+        }
+
+        .score-receipt::after {
+            bottom: -8px;
+            transform: rotate(180deg);
+        }
+
+        .receipt-head {
+            padding-bottom: 16px;
+            border-bottom: 1px dashed #777266;
+            text-align: center;
+        }
+
+        .receipt-head strong {
+            display: block;
+            font-size: 18px;
+            letter-spacing: 0.08em;
+        }
+
+        .receipt-head span {
+            display: block;
+            margin-top: 6px;
+            color: #625e55;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+        }
+
+        .receipt-items {
+            padding: 14px 0;
+            border-bottom: 1px dashed #777266;
+        }
+
+        .receipt-row,
+        .receipt-total-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: baseline;
+        }
+
+        .receipt-row {
+            padding: 6px 0;
+            font-size: 12px;
+        }
+
+        .receipt-row.penalty {
+            color: #a32631;
+            font-weight: 800;
+        }
+
+        .receipt-row b,
+        .receipt-total-row b {
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        .receipt-totals {
+            padding-top: 14px;
+        }
+
+        .receipt-total-row {
+            padding: 4px 0;
+            font-size: 12px;
+        }
+
+        .receipt-total-row.final {
+            margin-top: 9px;
+            padding-top: 12px;
+            border-top: 2px solid #171717;
+            font-size: 19px;
+            font-weight: 900;
+        }
+
+        .receipt-verdict {
+            margin: 18px 0 0;
+            padding-top: 14px;
+            border-top: 1px dashed #777266;
+            color: #39362f;
+            font-size: 11px;
+            line-height: 1.55;
+            text-align: center;
+        }
+
+        .patch-view,
+        .score-view {
+            margin-top: 18px;
+            border: 1px solid var(--line-bright);
+            color: var(--text);
+            background: #111319;
+        }
+
+        .dialog-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .dialog-header h2 { margin: 0; font-size: 15px; }
+        .dialog-close { padding: 8px; }
+        .score-content { padding: 20px; }
+
+        .patch-empty {
+            display: grid;
+            min-height: 420px;
+            place-items: center;
+            padding: 20px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .patch-empty strong {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--white);
+            font-size: 18px;
+        }
+
+        .patch-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 420px;
+            gap: 18px;
+            padding: 18px;
+        }
+
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+            gap: 10px;
+            align-content: start;
+        }
+
+        .character-card {
+            position: relative;
+            min-height: 154px;
+            padding: 10px;
+            border: 1px solid var(--line);
+            color: var(--text);
+            text-align: left;
+            cursor: pointer;
+            background: #0d0f14;
+        }
+
+        .character-card:hover,
+        .character-card.active {
+            border-color: var(--green);
+            background: #121821;
+        }
+
+        .character-card.no-patch {
+            opacity: 0.58;
+        }
+
+        .character-card.no-patch:hover,
+        .character-card.no-patch.active {
+            opacity: 1;
+        }
+
+        .character-card-meta {
+            display: block;
+        }
+
+        .character-card-copy {
+            min-width: 0;
+        }
+
+        .character-thumb {
+            display: grid;
+            height: 92px;
+            place-items: center;
+            overflow: hidden;
+            border: 1px solid #222832;
+            background: #08090c;
+        }
+
+        .character-thumb img {
+            width: 76px;
+            height: 100px;
+            object-fit: contain;
+            object-position: bottom center;
+        }
+
+        .character-placeholder {
+            color: var(--green);
+            font-size: 28px;
+            font-weight: 900;
+        }
+
+        .character-card-copy strong {
+            display: block;
+            margin-top: 9px;
+            padding-right: 48px;
+            overflow: hidden;
+            font-size: 13px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .character-card-copy span {
+            display: block;
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .patch-trend {
+            display: inline-flex;
+            flex: 0 0 auto;
+            gap: 4px;
+            align-items: center;
+            min-height: 22px;
+            margin-top: 8px;
+            padding: 3px 6px;
+            border: 1px solid var(--line-bright);
+            color: var(--muted);
+            font: 900 9px ui-monospace, SFMono-Regular, Consolas, monospace;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+            background: rgba(13, 15, 20, 0.88);
+        }
+
+        .patch-trend.buff {
+            border-color: #4d9fff;
+            color: #7ab8ff;
+        }
+
+        .patch-trend.nerf {
+            border-color: #ff5d6c;
+            color: #ff8792;
+        }
+
+        .patch-trend.adjustment {
+            border-color: #737b88;
+            color: #a4aab4;
+        }
+
+        .patch-trend b {
+            color: inherit;
+            font-size: 9px;
+        }
+
+        .character-card > .character-card-meta > .patch-trend {
+            position: absolute;
+            top: 111px;
+            right: 10px;
+            margin-top: 0;
+            padding-inline: 5px;
+            font-size: 8px;
+        }
+
+        .character-card > .character-card-meta > .patch-trend b {
+            font-size: 8px;
+        }
+
+        .patch-detail {
+            min-height: 540px;
+            border: 1px solid var(--line);
+            background: #0d0f14;
+        }
+
+        .patch-detail-header {
+            display: grid;
+            grid-template-columns: 82px minmax(0, 1fr) auto;
+            gap: 14px;
+            align-items: start;
+            padding: 16px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .patch-detail-header .character-thumb {
+            height: 82px;
+        }
+
+        .patch-detail-header h2 {
+            margin: 8px 0 0;
+            font-size: 24px;
+        }
+
+        .patch-detail-header p {
+            margin: 7px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .patch-detail-header > .patch-trend {
+            margin-top: 0;
+            min-height: 30px;
+            padding: 6px 10px;
+            border-width: 2px;
+            font-size: 12px;
+            letter-spacing: 0.06em;
+        }
+
+        .patch-detail-header > .patch-trend b {
+            font-size: 12px;
+        }
+
+        .patch-list {
+            display: grid;
+            gap: 12px;
+            max-height: 620px;
+            padding: 14px;
+            overflow: auto;
+        }
+
+        .patch-entry {
+            padding: 14px;
+            border: 1px solid var(--line);
+            background: #111319;
+        }
+
+        .patch-entry h3 {
+            margin: 0;
+            color: var(--green);
+            font-size: 13px;
+        }
+
+        .patch-entry-meta {
+            margin: 7px 0 0;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .patch-comment,
+        .patch-changes {
+            margin-top: 12px;
+            color: #c5cad3;
+            font-size: 12px;
+            line-height: 1.65;
+            white-space: pre-line;
+        }
+
+        .patch-changes {
+            display: grid;
+            gap: 9px;
+        }
+
+        .change-item {
+            padding-left: 10px;
+            border-left: 2px solid var(--line-bright);
+        }
+
+        .change-item strong {
+            display: block;
+            margin-bottom: 3px;
+            color: var(--yellow);
+            font-size: 11px;
+        }
+
+        .score-section + .score-section { margin-top: 22px; }
+        .score-section h3 {
+            margin: 0 0 10px;
+            color: var(--green);
+            font-size: 12px;
+            letter-spacing: 0.08em;
+        }
+
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .score-table th,
+        .score-table td {
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            text-align: left;
+        }
+
+        .score-table th {
+            color: var(--muted);
+            font-size: 10px;
+            background: #0c0e12;
+        }
+
+        .score-table td:last-child {
+            color: var(--yellow);
+            font-weight: 850;
+        }
+
+        .score-note {
+            margin: 18px 0 0;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 900px) {
+            .workspace { grid-template-columns: 1fr; }
+            .team-panel { position: static; }
+            .team-body {
+                display: grid;
+                grid-template-columns: 180px 1fr;
+                gap: 22px;
+                align-items: center;
+            }
+            .team-result { margin-top: 0; text-align: left; }
+            .legend { grid-column: 2; margin-top: -40px; }
+            .my-dashboard { grid-template-columns: 200px minmax(0, 1fr); }
+            .my-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .patch-layout { grid-template-columns: 1fr; }
+            .patch-list { max-height: none; }
+        }
+
+        @media (max-width: 680px) {
+            .shell { width: min(100% - 22px, 1180px); padding-top: 14px; }
+            .top-note { display: none; }
+            .topbar { align-items: flex-start; gap: 14px; }
+            .top-actions { align-items: flex-end; flex-direction: column-reverse; }
+            .view-tabs { flex-wrap: wrap; }
+            .view-tab { padding: 0 9px; font-size: 10px; }
+            .fields { grid-template-columns: 1fr; }
+            .versus { height: 14px; }
+            .submit-button { height: 52px; }
+            .results { grid-template-columns: 1fr; }
+            .card-main { grid-template-columns: 105px minmax(0, 1fr); gap: 18px; }
+            .traffic-signal { width: 105px; height: 154px; }
+            .team-body { grid-template-columns: 130px 1fr; }
+            .legend { grid-column: 1 / -1; margin-top: 0; }
+            .my-form,
+            .my-dashboard { grid-template-columns: 1fr; }
+            .my-form .submit-button { height: 52px; }
+            .my-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+<main class="shell">
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">ER</div>
+            <div class="brand-copy">
+                <strong>DODGE CHECK</strong>
+                <span>Ranked teammate analyzer</span>
+            </div>
+        </div>
+        <div class="top-actions">
+            <nav class="view-tabs" aria-label="분석 모드">
+                <button class="view-tab active" type="button" data-view="team">팀원 분석</button>
+                <button class="view-tab" type="button" data-view="my">나 분석</button>
+                <button class="view-tab" type="button" data-view="patch">패치 내역</button>
+                <button class="view-tab" type="button" data-view="score">채점표</button>
+            </nav>
+        </div>
+    </header>
+
+    <div id="team-view" class="workspace">
+        <section class="main-panel">
+            <div class="panel-header">
+                <h1 class="panel-title">TEAMMATE SCAN</h1>
+                <span class="step">01 / INPUT</span>
+            </div>
+
+            <form id="analyze-form" class="search-form" novalidate>
+                <div class="fields">
+                    <div class="field">
+                        <label for="nickname-1">TEAMMATE 01</label>
+                        <input id="nickname-1" maxlength="30" autocomplete="off"
+                               placeholder="첫 번째 닉네임">
+                    </div>
+                    <span class="versus">VS</span>
+                    <div class="field">
+                        <label for="nickname-2">TEAMMATE 02 / OPTIONAL</label>
+                        <input id="nickname-2" maxlength="30" autocomplete="off"
+                               placeholder="두 번째 닉네임 (선택)">
+                    </div>
+                    <button id="submit-button" class="submit-button" type="submit">SCAN</button>
+                </div>
+                <p id="form-error" class="form-error" role="alert"></p>
+            </form>
+
+            <div id="loading" class="status-line" role="status">
+                <span class="status-dot"></span>
+                RANK DATA ANALYSIS IN PROGRESS
+            </div>
+
+            <div id="result-area" class="result-area">
+                <div id="empty-state" class="empty-state">
+                    <div>
+                        <strong>WAITING FOR TEAMMATE DATA</strong>
+                        <span>팀원 닉네임을 한 명 이상 입력하면 판정을 시작합니다.</span>
+                    </div>
+                </div>
+                <section id="results" class="results" aria-live="polite"></section>
+            </div>
+        </section>
+
+        <aside class="team-panel">
+            <div class="panel-header">
+                <h2 class="panel-title">TEAM SIGNAL</h2>
+                <span class="step">02 / VERDICT</span>
+            </div>
+            <div class="team-body">
+                <div id="team-signal" class="team-signal" aria-label="팀 판정 신호등">
+                    <i class="signal-light signal-red"></i>
+                    <i class="signal-light signal-yellow"></i>
+                    <i class="signal-light signal-green"></i>
+                </div>
+                <div class="team-result">
+                    <span>CURRENT VERDICT</span>
+                    <strong id="team-verdict">STANDBY</strong>
+                    <p id="team-description">분석 결과가 여기에 표시됩니다.</p>
+                </div>
+                <div class="legend">
+                    <div class="legend-row">
+                        <span class="legend-label">
+                            <i class="legend-light" style="--light: var(--green)"></i>진행
+                        </span>
+                        <span>70+</span>
+                    </div>
+                    <div class="legend-row">
+                        <span class="legend-label">
+                            <i class="legend-light" style="--light: var(--yellow)"></i>주의
+                        </span>
+                        <span>35-69</span>
+                    </div>
+                    <div class="legend-row">
+                        <span class="legend-label">
+                            <i class="legend-light" style="--light: var(--red)"></i>닷지
+                        </span>
+                        <span>0-34</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <section id="my-view" class="my-view" hidden>
+        <div class="panel-header">
+            <h1 class="panel-title">MY RANK ANALYSIS</h1>
+            <span class="step">SOLO REPORT</span>
+        </div>
+        <form id="my-form" class="my-form" novalidate>
+            <div class="field">
+                <label for="my-nickname">MY NICKNAME</label>
+                <input id="my-nickname" maxlength="30" autocomplete="off"
+                       placeholder="내 닉네임">
+            </div>
+            <button id="my-submit" class="submit-button" type="submit">ANALYZE</button>
+            <p id="my-error" class="form-error" role="alert"></p>
+        </form>
+        <div id="my-loading" class="status-line" role="status">
+            <span class="status-dot"></span>
+            PERSONAL RANK REPORT IN PROGRESS
+        </div>
+        <div id="my-result" class="my-result">
+            <div id="my-empty" class="empty-state">
+                <div>
+                    <strong>WAITING FOR PLAYER DATA</strong>
+                    <span>닉네임을 입력하면 개인 기록을 분석합니다.</span>
+                </div>
+            </div>
+            <div id="my-output"></div>
+        </div>
+    </section>
+
+    <section id="patch-view" class="patch-view" hidden>
+        <div class="panel-header">
+            <h1 class="panel-title">PATCH HISTORY</h1>
+            <span class="step">CHARACTER LOG</span>
+        </div>
+        <div id="patch-loading" class="status-line" role="status">
+            <span class="status-dot"></span>
+            CHARACTER PATCH DATA LOADING
+        </div>
+        <div class="patch-layout">
+            <section id="character-grid" class="character-grid" aria-label="캐릭터 목록"></section>
+            <aside id="patch-detail" class="patch-detail">
+                <div class="patch-empty">
+                    <div>
+                        <strong>캐릭터를 선택하세요</strong>
+                        <span>썸네일을 누르면 이번 시즌 패치 내역을 표시합니다.</span>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <section id="score-view" class="score-view" hidden>
+        <div class="dialog-header">
+            <h2>점수 산정표 / 100점</h2>
+        </div>
+        <div class="score-content">
+        <section class="score-section">
+            <h3>평균 순위 / 15점</h3>
+            <table class="score-table">
+                <tr><th>기준</th><th>점수</th></tr>
+                <tr><td>3.3위 이하</td><td>15점</td></tr>
+                <tr><td>3.8위 이하</td><td>12점</td></tr>
+                <tr><td>4.3위 이하</td><td>8점</td></tr>
+                <tr><td>4.8위 이하</td><td>4점</td></tr>
+                <tr><td>4.8위 초과</td><td>0점</td></tr>
+            </table>
+        </section>
+        <section class="score-section">
+            <h3>승률 / 15점</h3>
+            <table class="score-table">
+                <tr><th>기준</th><th>점수</th></tr>
+                <tr><td>22% 이상</td><td>15점</td></tr>
+                <tr><td>18% 이상</td><td>12점</td></tr>
+                <tr><td>14% 이상</td><td>8점</td></tr>
+                <tr><td>10% 이상</td><td>4점</td></tr>
+                <tr><td>10% 미만</td><td>0점</td></tr>
+            </table>
+        </section>
+        <section class="score-section">
+            <h3>Top 3 비율 / 15점</h3>
+            <table class="score-table">
+                <tr><th>기준</th><th>점수</th></tr>
+                <tr><td>60% 이상</td><td>15점</td></tr>
+                <tr><td>50% 이상</td><td>12점</td></tr>
+                <tr><td>40% 이상</td><td>8점</td></tr>
+                <tr><td>30% 이상</td><td>4점</td></tr>
+                <tr><td>30% 미만</td><td>0점</td></tr>
+            </table>
+        </section>
+        <section class="score-section">
+            <h3>주력 캐릭터 비율 / 10점</h3>
+            <table class="score-table">
+                <tr><th>50경기 이상 기준</th><th>점수</th></tr>
+                <tr><td>25% 이상 ~ 45% 이하</td><td>10점</td></tr>
+                <tr><td>45% 초과 ~ 60% 이하</td><td>8점</td></tr>
+                <tr><td>15% 이상 ~ 25% 미만</td><td>7점</td></tr>
+                <tr><td>60% 초과</td><td>5점</td></tr>
+                <tr><td>15% 미만</td><td>4점</td></tr>
+                <tr><td>50경기 미만</td><td>3점</td></tr>
+            </table>
+        </section>
+        <section class="score-section">
+            <h3>최근 랭크 20게임 / 40점</h3>
+            <table class="score-table">
+                <tr><th>평균 순위 / 20점</th><th>점수</th></tr>
+                <tr><td>3.3위 이하</td><td>20점</td></tr>
+                <tr><td>4.0위 이하</td><td>15점</td></tr>
+                <tr><td>4.7위 이하</td><td>9점</td></tr>
+                <tr><td>5.3위 이하</td><td>4점</td></tr>
+                <tr><td>5.3위 초과</td><td>0점</td></tr>
+                <tr><th>평균 피해량 / 20점</th><th>점수</th></tr>
+                <tr><td>13,000 이상</td><td>20점</td></tr>
+                <tr><td>11,000 이상</td><td>15점</td></tr>
+                <tr><td>9,000 이상</td><td>10점</td></tr>
+                <tr><td>7,500 이상</td><td>5점</td></tr>
+                <tr><td>7,500 미만</td><td>0점</td></tr>
+            </table>
+        </section>
+        <section class="score-section">
+            <h3>시야·정찰 활동 / 5점</h3>
+            <table class="score-table">
+                <tr><th>최근 20게임 평균 기준</th><th>점수</th></tr>
+                <tr><td>콘솔 사용 + 카메라 설치 + 카메라 제거 6회 이상</td><td>5점</td></tr>
+                <tr><td>4회 이상</td><td>4점</td></tr>
+                <tr><td>2.5회 이상</td><td>3점</td></tr>
+                <tr><td>1회 이상</td><td>1점</td></tr>
+                <tr><td>1회 미만</td><td>0점</td></tr>
+            </table>
+        </section>
+        <section class="score-section">
+            <h3>위험 지표 감점 / 최대 -25점</h3>
+            <table class="score-table">
+                <tr><th>위험 지표</th><th>감점</th></tr>
+                <tr><td>50경기 이상 · 승률 8% 미만</td><td>-12점</td></tr>
+                <tr><td>50경기 이상 · 승률 10% 미만</td><td>-7점</td></tr>
+                <tr><td>최근 10경기 이상 · 평균 순위 5.8위 초과</td><td>-10점</td></tr>
+                <tr><td>최근 10경기 이상 · 평균 순위 5.3위 초과</td><td>-5점</td></tr>
+                <tr><td>최근 10경기 이상 · 평균 피해량 7,000 미만</td><td>-8점</td></tr>
+                <tr><td>최근 10경기 이상 · 평균 피해량 8,000 미만</td><td>-4점</td></tr>
+                <tr><td>시즌 평균 5.2위 초과 + 최근 평균 5.8위 초과</td><td>-8점</td></tr>
+                <tr><td>최근 20게임 중 Top 3 4회 미만</td><td>-5점</td></tr>
+            </table>
+        </section>
+        <p class="score-note">
+            기본 배점은 총 100점이며, 위험 지표에 따라 최대 25점이 감점됩니다.
+            판정 기준: 진행 70점 이상, 주의 35점 이상, 닷지 권장 35점 미만입니다.
+            등급은 최고 85점 이상, 좋음 70점 이상, 보통 50점 이상으로 구분합니다.
+        </p>
+        </div>
+    </section>
+</main>
+
+<script>
+    const form = document.getElementById("analyze-form");
+    const button = document.getElementById("submit-button");
+    const loading = document.getElementById("loading");
+    const results = document.getElementById("results");
+    const emptyState = document.getElementById("empty-state");
+    const formError = document.getElementById("form-error");
+    const teamSignal = document.getElementById("team-signal");
+    const teamVerdict = document.getElementById("team-verdict");
+    const teamDescription = document.getElementById("team-description");
+    const inputs = [
+        document.getElementById("nickname-1"),
+        document.getElementById("nickname-2")
+    ];
+    const teamView = document.getElementById("team-view");
+    const myView = document.getElementById("my-view");
+    const patchView = document.getElementById("patch-view");
+    const scoreView = document.getElementById("score-view");
+    const patchLoading = document.getElementById("patch-loading");
+    const characterGrid = document.getElementById("character-grid");
+    const patchDetail = document.getElementById("patch-detail");
+    const viewTabs = document.querySelectorAll(".view-tab");
+    const myForm = document.getElementById("my-form");
+    const myNickname = document.getElementById("my-nickname");
+    const mySubmit = document.getElementById("my-submit");
+    const myLoading = document.getElementById("my-loading");
+    const myResult = document.getElementById("my-result");
+    const myEmpty = document.getElementById("my-empty");
+    const myOutput = document.getElementById("my-output");
+    const myError = document.getElementById("my-error");
+    let patchCharactersLoaded = false;
+
+    function escapeHtml(value) {
+        const element = document.createElement("div");
+        element.textContent = value;
+        return element.innerHTML;
+    }
+
+    function signalFor(score) {
+        if (score >= 70) return {color: "#55e39b", label: "PROCEED"};
+        if (score >= 35) return {color: "#ffc45c", label: "CAUTION"};
+        return {color: "#ff5d6c", label: "DODGE"};
+    }
+
+    function trafficSignalMarkup(signalLabel) {
+        const signalClass = signalLabel.toLowerCase();
+        return `
+            <div class="traffic-signal signal-${signalClass}" aria-label="${signalLabel} 신호">
+                <i class="signal-light signal-red"></i>
+                <i class="signal-light signal-yellow"></i>
+                <i class="signal-light signal-green"></i>
+            </div>
+        `;
+    }
+
+    function thumbnailMarkup(character) {
+        if (character.thumbnail) {
+            return `<img src="${escapeHtml(character.thumbnail)}" alt="${escapeHtml(character.name)}">`;
+        }
+        return `<span class="character-placeholder">${escapeHtml(character.name.slice(0, 1))}</span>`;
+    }
+
+    function formatDate(value) {
+        if (!value) return "";
+        return value.slice(0, 10);
+    }
+
+    function trendBadgeMarkup(character) {
+        const labels = {
+            buff: "버프",
+            nerf: "너프",
+            adjustment: "조정"
+        };
+        const trend = character.latestTrend;
+        if (!labels[trend]) return "";
+
+        const streak = (
+            (trend === "buff" || trend === "nerf")
+            && character.trendStreak > 1
+        )
+            ? `<b>X${character.trendStreak}</b>`
+            : "";
+        return `<span class="patch-trend ${trend}">${labels[trend]}${streak}</span>`;
+    }
+
+    function renderCharacterGrid(characters) {
+        characterGrid.innerHTML = characters.map(character => `
+            <button class="character-card ${character.patchCount ? "" : "no-patch"}" type="button" data-character="${escapeHtml(character.name)}">
+                <div class="character-thumb">${thumbnailMarkup(character)}</div>
+                <div class="character-card-meta">
+                    <div class="character-card-copy">
+                        <strong>${escapeHtml(character.name)}</strong>
+                        <span>${character.patchCount} 패치 · ${character.changeCount} 변경</span>
+                    </div>
+                    ${trendBadgeMarkup(character)}
+                </div>
+            </button>
+        `).join("");
+    }
+
+    async function loadPatchCharacters() {
+        if (patchCharactersLoaded) return;
+        patchLoading.classList.add("visible");
+        try {
+            const response = await fetch("/api/patches/characters");
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || "패치 내역을 불러오지 못했습니다.");
+            }
+            renderCharacterGrid(data.characters);
+            patchCharactersLoaded = true;
+        } catch (error) {
+            patchDetail.innerHTML = `
+                <div class="patch-empty">
+                    <div>
+                        <strong>패치 내역 오류</strong>
+                        <span>${escapeHtml(error.message || "서버에 연결하지 못했습니다.")}</span>
+                    </div>
+                </div>
+            `;
+        } finally {
+            patchLoading.classList.remove("visible");
+        }
+    }
+
+    function renderPatchDetail(data) {
+        const character = data.character;
+        const patchCount = data.patches.length;
+        const changeCount = data.patches.reduce((sum, patch) => sum + patch.changes.length, 0);
+        const patchList = data.patches.length
+            ? data.patches.map(patch => `
+                <article class="patch-entry">
+                    <h3>${escapeHtml(patch.patchVersion)} · ${escapeHtml(patch.title)}</h3>
+                    <p class="patch-entry-meta">${formatDate(patch.publishedAt)} · <a href="${escapeHtml(patch.url)}" target="_blank" rel="noreferrer">원문</a></p>
+                    ${patch.comment ? `<div class="patch-comment"><strong>[COMMENT]</strong>\n${escapeHtml(patch.comment)}</div>` : ""}
+                    <div class="patch-changes">
+                        ${patch.changes.map(change => `
+                            <div class="change-item">
+                                ${change.target ? `<strong>${escapeHtml(change.target)}</strong>` : ""}
+                                <span>${escapeHtml(change.text)}</span>
+                            </div>
+                        `).join("")}
+                    </div>
+                </article>
+            `).join("")
+            : `
+                <div class="patch-empty">
+                    <div>
+                        <strong>이번 시즌 패치 내역 없음</strong>
+                        <span>11.* 정규 패치에서 이 캐릭터의 변경 내역을 찾지 못했습니다.</span>
+                    </div>
+                </div>
+            `;
+        patchDetail.innerHTML = `
+            <div class="patch-detail-header">
+                <div class="character-thumb">${thumbnailMarkup(character)}</div>
+                <div>
+                    <h2>${escapeHtml(character.name)}</h2>
+                    <p>이번 시즌 ${patchCount} 패치 · ${changeCount} 변경</p>
+                </div>
+                ${trendBadgeMarkup(character)}
+            </div>
+            <div class="patch-list">
+                ${patchList}
+            </div>
+        `;
+    }
+
+    async function loadCharacterPatchDetail(characterName) {
+        patchDetail.innerHTML = `
+            <div class="patch-empty">
+                <div>
+                    <strong>${escapeHtml(characterName)}</strong>
+                    <span>패치 내역을 불러오는 중입니다.</span>
+                </div>
+            </div>
+        `;
+        try {
+            const response = await fetch(`/api/patches/characters/${encodeURIComponent(characterName)}`);
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || "캐릭터 패치 내역을 불러오지 못했습니다.");
+            }
+            renderPatchDetail(data);
+        } catch (error) {
+            patchDetail.innerHTML = `
+                <div class="patch-empty">
+                    <div>
+                        <strong>조회 실패</strong>
+                        <span>${escapeHtml(error.message || "서버에 연결하지 못했습니다.")}</span>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    function renderCard(player, index) {
+        const nickname = escapeHtml(player.nickname || `팀원 ${index + 1}`);
+        if (player.error) {
+            return `
+                <article class="player-card error-card" style="--signal: #ff5d6c">
+                    <span class="card-index">TEAMMATE 0${index + 1} / ERROR</span>
+                    <h2 class="player-name">${nickname}</h2>
+                    <p class="error-message">${escapeHtml(player.error)}</p>
+                </article>
+            `;
+        }
+
+        const signal = signalFor(player.score);
+        const warnings = player.warnings.length
+            ? `<div class="warnings">${player.warnings.map(
+                warning => `<span class="warning">${escapeHtml(warning)}</span>`
+            ).join("")}</div>`
+            : "";
+
+        return `
+            <article class="player-card" style="--signal: ${signal.color}">
+                <span class="card-index">TEAMMATE 0${index + 1} / ANALYZED</span>
+                <div class="card-main">
+                    ${trafficSignalMarkup(signal.label)}
+                    <div>
+                        <h2 class="player-name">${nickname}</h2>
+                        <div class="score">${player.score}<small>/100</small></div>
+                        <div class="grade">${signal.label} · ${escapeHtml(player.grade)}</div>
+                    </div>
+                </div>
+                <p class="comment">${escapeHtml(player.comment)}</p>
+                ${warnings}
+            </article>
+        `;
+    }
+
+    function updateTeamSignal(players) {
+        const validPlayers = players.filter(player => !player.error);
+        teamSignal.classList.remove("signal-proceed", "signal-caution", "signal-dodge");
+        if (!validPlayers.length || validPlayers.length !== players.length) {
+            teamSignal.classList.add("signal-dodge");
+            teamSignal.style.setProperty("--team-color", "#ff5d6c");
+            teamVerdict.style.setProperty("--team-color", "#ff5d6c");
+            teamVerdict.textContent = "CHECK FAILED";
+            teamDescription.textContent = "입력한 팀원의 전적을 확인하지 못했습니다.";
+            return;
+        }
+
+        const lowestScore = Math.min(...validPlayers.map(player => player.score));
+        const signal = signalFor(lowestScore);
+        const descriptions = {
+            PROCEED: validPlayers.length === 1
+                ? "해당 팀원은 진행 가능한 범위입니다."
+                : "두 팀원 모두 진행 가능한 범위입니다.",
+            CAUTION: "주의가 필요한 팀원이 있습니다.",
+            DODGE: "위험 신호가 감지되었습니다."
+        };
+
+        teamSignal.classList.add(`signal-${signal.label.toLowerCase()}`);
+        teamSignal.style.setProperty("--team-color", signal.color);
+        teamVerdict.style.setProperty("--team-color", signal.color);
+        teamVerdict.textContent = signal.label;
+        teamDescription.textContent = descriptions[signal.label];
+    }
+
+    function metricCard(label, value, note) {
+        return `
+            <article class="metric-card">
+                <span>${label}</span>
+                <strong>${value}</strong>
+                <small>${note}</small>
+            </article>
+        `;
+    }
+
+    function renderMyResult(player) {
+        if (player.error) {
+            return `
+                <article class="player-card error-card" style="--signal: #ff5d6c">
+                    <span class="card-index">PERSONAL REPORT / ERROR</span>
+                    <h2 class="player-name">${escapeHtml(player.nickname)}</h2>
+                    <p class="error-message">${escapeHtml(player.error)}</p>
+                </article>
+            `;
+        }
+
+        const metrics = player.metrics;
+        const recentRank = metrics.recentAverageRank ?? "-";
+        const recentDamage = metrics.recentAverageDamage === null
+            ? "-"
+            : metrics.recentAverageDamage.toLocaleString("ko-KR");
+        const recentScouting = metrics.recentAverageScouting ?? "-";
+        const breakdown = Array.isArray(player.scoreBreakdown)
+            ? player.scoreBreakdown
+            : [];
+        const baseRows = breakdown.filter(item => !item.isPenalty);
+        const penaltyRows = breakdown.filter(item => item.isPenalty);
+        const baseScore = baseRows.reduce((sum, item) => sum + item.score, 0);
+        const penaltyScore = penaltyRows.reduce((sum, item) => sum + Math.abs(item.score), 0);
+        const receiptRows = breakdown.map(item => `
+            <div class="receipt-row ${item.isPenalty ? "penalty" : ""}">
+                <span>${escapeHtml(item.label)}${item.isPenalty ? "" : ` / ${item.maxScore}`}</span>
+                <b>${item.score > 0 ? "+" : ""}${item.score}점</b>
+            </div>
+        `).join("");
+
+        return `
+            <div class="my-dashboard raw-dashboard">
+                <section class="my-record-header">
+                    <span>COLLECTED RANK DATA</span>
+                    <h2>${escapeHtml(player.nickname)}</h2>
+                </section>
+                <div class="my-metrics">
+                    ${metricCard("SEASON ID", metrics.seasonId, "분석 대상 시즌")}
+                    ${metricCard("TOTAL RANK GAMES", metrics.totalGames.toLocaleString("ko-KR"), "시즌 랭크 경기 수")}
+                    ${metricCard("WIN RATE", `${metrics.winRate}%`, "시즌 우승 비율")}
+                    ${metricCard("AVERAGE RANK", `${metrics.averageRank}위`, "시즌 전체 평균")}
+                    ${metricCard("TOP 3 RATE", `${metrics.top3Rate}%`, "3위 이내 진입")}
+                    ${metricCard("MAIN CHARACTER", `${metrics.mainCharacterRate}%`, "가장 많이 한 캐릭터 비율")}
+                    ${metricCard("RECENT RANK GAMES", metrics.recentGames, "최근 기록에서 수집된 랭크 경기")}
+                    ${metricCard("RECENT AVG RANK", `${recentRank}위`, "최근 랭크 경기 평균 순위")}
+                    ${metricCard("RECENT AVG DAMAGE", recentDamage, "최근 랭크 경기 평균 플레이어 피해")}
+                    ${metricCard("RECENT SCOUTING", recentScouting, "평균 콘솔·카메라 설치·제거 횟수")}
+                </div>
+                <section class="score-receipt" aria-label="점수 산정 영수증">
+                    <div class="receipt-head">
+                        <strong>ER DODGE CHECK</strong>
+                        <span>PERSONAL SCORE RECEIPT · ${escapeHtml(player.nickname)}</span>
+                    </div>
+                    <div class="receipt-items">
+                        ${receiptRows}
+                    </div>
+                    <div class="receipt-totals">
+                        <div class="receipt-total-row">
+                            <span>기본 획득점수</span>
+                            <b>${baseScore}점</b>
+                        </div>
+                        <div class="receipt-total-row">
+                            <span>위험 감점</span>
+                            <b>-${penaltyScore}점</b>
+                        </div>
+                        <div class="receipt-total-row final">
+                            <span>FINAL SCORE</span>
+                            <b>${player.score} / 100</b>
+                        </div>
+                    </div>
+                    <p class="receipt-verdict">
+                        ${escapeHtml(player.grade)} · ${escapeHtml(player.comment)}
+                    </p>
+                </section>
+            </div>
+        `;
+    }
+
+    viewTabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            const view = tab.dataset.view;
+            teamView.hidden = view !== "team";
+            myView.hidden = view !== "my";
+            patchView.hidden = view !== "patch";
+            scoreView.hidden = view !== "score";
+            viewTabs.forEach(item => item.classList.toggle("active", item === tab));
+            if (view === "patch") loadPatchCharacters();
+        });
+    });
+
+    characterGrid.addEventListener("click", event => {
+        const card = event.target.closest(".character-card");
+        if (!card) return;
+        characterGrid.querySelectorAll(".character-card").forEach(item => {
+            item.classList.toggle("active", item === card);
+        });
+        loadCharacterPatchDetail(card.dataset.character);
+    });
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const nicknames = inputs
+            .map(input => input.value.trim())
+            .filter(nickname => nickname);
+        formError.textContent = "";
+
+        if (!nicknames.length) {
+            formError.textContent = "팀원 닉네임을 한 명 이상 입력해 주세요.";
+            return;
+        }
+        if (
+            nicknames.length === 2
+            && nicknames[0].toLocaleLowerCase() === nicknames[1].toLocaleLowerCase()
+        ) {
+            formError.textContent = "서로 다른 두 닉네임을 입력해 주세요.";
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "SCANNING";
+        loading.classList.add("visible");
+        emptyState.hidden = true;
+        results.innerHTML = "";
+
+        try {
+            const response = await fetch("/analyze", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({nicknames})
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || "요청을 처리하지 못했습니다.");
+            }
+            results.innerHTML = data.results.map(renderCard).join("");
+            updateTeamSignal(data.results);
+        } catch (error) {
+            formError.textContent = error.message || "서버에 연결하지 못했습니다.";
+            emptyState.hidden = false;
+        } finally {
+            button.disabled = false;
+            button.textContent = "SCAN";
+            loading.classList.remove("visible");
+        }
+    });
+
+    myForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const nickname = myNickname.value.trim();
+        myError.textContent = "";
+
+        if (!nickname) {
+            myError.textContent = "닉네임을 입력해 주세요.";
+            return;
+        }
+
+        mySubmit.disabled = true;
+        mySubmit.textContent = "ANALYZING";
+        myLoading.classList.add("visible");
+        myEmpty.hidden = true;
+        myOutput.innerHTML = "";
+
+        try {
+            const response = await fetch("/analyze/me", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({nickname})
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || "요청을 처리하지 못했습니다.");
+            }
+            myOutput.innerHTML = renderMyResult(data.result);
+        } catch (error) {
+            myError.textContent = error.message || "서버에 연결하지 못했습니다.";
+            myEmpty.hidden = false;
+        } finally {
+            mySubmit.disabled = false;
+            mySubmit.textContent = "ANALYZE";
+            myLoading.classList.remove("visible");
+        }
+    });
+</script>
+</body>
+</html>

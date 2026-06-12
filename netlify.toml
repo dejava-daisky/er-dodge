@@ -1,0 +1,32 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  included_files = ["data/**"]
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/analyze"
+  to = "/.netlify/functions/analyze"
+  status = 200
+
+[[redirects]]
+  from = "/analyze/me"
+  to = "/.netlify/functions/analyze-me"
+  status = 200
+
+[[redirects]]
+  from = "/api/patches/characters"
+  to = "/.netlify/functions/patch-characters"
+  status = 200
+
+[[redirects]]
+  from = "/api/patches/characters/:name"
+  to = "/.netlify/functions/patch-character?name=:name"
+  status = 200
+
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

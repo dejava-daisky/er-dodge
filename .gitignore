@@ -1,2 +1,5 @@
+.netlify/
+node_modules/
 .env
-__pycache__/
+.netlify-dev.*.log
+deno.lock

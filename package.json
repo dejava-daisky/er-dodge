@@ -1,0 +1,8 @@
+{
+  "name": "er-dodge-check-netlify",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check netlify/functions/analyze.mjs && node --check netlify/functions/analyze-me.mjs && node --check netlify/functions/patch-characters.mjs && node --check netlify/functions/patch-character.mjs"
+  }
+}
