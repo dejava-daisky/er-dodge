@@ -141,17 +141,51 @@ function calculateScore(stats, recentGames) {
 
   const rankScore =
     averageRank <= 3.3 ? 15 : averageRank <= 3.8 ? 12 : averageRank <= 4.3 ? 8 : averageRank <= 4.8 ? 4 : 0;
-  breakdown.set("평균 순위", [rankScore, 15]);
+  const rankRule =
+    rankScore === 15
+      ? "3.3위 이하"
+      : rankScore === 12
+        ? "3.8위 이하"
+        : rankScore === 8
+          ? "4.3위 이하"
+          : rankScore === 4
+            ? "4.8위 이하"
+            : "4.8위 초과";
+  breakdown.set("평균 순위", [rankScore, 15, `${averageRank.toFixed(2)}위 · ${rankRule}`]);
   score += rankScore;
 
   const winScore =
     winRate >= 0.22 ? 15 : winRate >= 0.18 ? 12 : winRate >= 0.14 ? 8 : winRate >= 0.1 ? 4 : 0;
-  breakdown.set("승률", [winScore, 15]);
+  const winRule =
+    winScore === 15
+      ? "22% 이상"
+      : winScore === 12
+        ? "18% 이상"
+        : winScore === 8
+          ? "14% 이상"
+          : winScore === 4
+            ? "10% 이상"
+            : "10% 미만";
+  breakdown.set("승률", [winScore, 15, `${(winRate * 100).toFixed(1)}% · ${winRule}`]);
   score += winScore;
 
   const top3Score =
     top3 >= 0.6 ? 15 : top3 >= 0.5 ? 12 : top3 >= 0.4 ? 8 : top3 >= 0.3 ? 4 : 0;
-  breakdown.set("상위권 진입", [top3Score, 15]);
+  const top3Rule =
+    top3Score === 15
+      ? "60% 이상"
+      : top3Score === 12
+        ? "50% 이상"
+        : top3Score === 8
+          ? "40% 이상"
+          : top3Score === 4
+            ? "30% 이상"
+            : "30% 미만";
+  breakdown.set("상위권 진입", [
+    top3Score,
+    15,
+    `TOP 3 ${(top3 * 100).toFixed(1)}% · ${top3Rule}`,
+  ]);
   score += top3Score;
 
   let focusScore = 3;
@@ -167,12 +201,26 @@ function calculateScore(stats, recentGames) {
               ? 7
               : 4;
   }
-  breakdown.set("캐릭터 집중도", [focusScore, 10]);
+  const focusDetail =
+    totalGames < 50
+      ? `${totalGames}판 · 50판 미만 표본`
+      : mostUsedRatio > 0.6
+        ? `${(mostUsedRatio * 100).toFixed(1)}% · 원챔 성향`
+        : mostUsedRatio < 0.15
+          ? `${(mostUsedRatio * 100).toFixed(1)}% · 이것저것 성향`
+          : mostUsedRatio <= 0.25
+            ? `${(mostUsedRatio * 100).toFixed(1)}% · 15~25% 구간`
+            : mostUsedRatio <= 0.45
+              ? `${(mostUsedRatio * 100).toFixed(1)}% · 권장 집중 구간`
+              : `${(mostUsedRatio * 100).toFixed(1)}% · 45~60% 구간`;
+  breakdown.set("캐릭터 집중도", [focusScore, 10, focusDetail]);
   score += focusScore;
 
   let averageRecentRank = null;
   let averageRecentDamage = null;
   let formScore = 0;
+  let recentRankScore = 0;
+  let recentDamageScore = 0;
   if (recentGames.length) {
     averageRecentRank =
       recentGames.reduce((sum, game) => sum + (Number(game.gameRank) || 9), 0) /
@@ -181,12 +229,32 @@ function calculateScore(stats, recentGames) {
       recentGames.reduce((sum, game) => sum + (Number(game.damageToPlayer) || 0), 0) /
       recentGames.length;
 
-    formScore +=
-      averageRecentRank <= 3.3 ? 20 : averageRecentRank <= 4 ? 15 : averageRecentRank <= 4.7 ? 9 : averageRecentRank <= 5.3 ? 4 : 0;
-    formScore +=
-      averageRecentDamage >= 13000 ? 20 : averageRecentDamage >= 11000 ? 15 : averageRecentDamage >= 9000 ? 10 : averageRecentDamage >= 7500 ? 5 : 0;
+    recentRankScore =
+      averageRecentRank <= 3.3
+        ? 20
+        : averageRecentRank <= 4
+          ? 15
+          : averageRecentRank <= 4.7
+            ? 9
+            : averageRecentRank <= 5.3
+              ? 4
+              : 0;
+    recentDamageScore =
+      averageRecentDamage >= 13000
+        ? 20
+        : averageRecentDamage >= 11000
+          ? 15
+          : averageRecentDamage >= 9000
+            ? 10
+            : averageRecentDamage >= 7500
+              ? 5
+              : 0;
+    formScore = recentRankScore + recentDamageScore;
   }
-  breakdown.set("최근 폼", [formScore, 40]);
+  const formDetail = recentGames.length
+    ? `평균 ${averageRecentRank.toFixed(2)}위 +${recentRankScore}/20 · 피해량 ${Math.round(averageRecentDamage).toLocaleString("ko-KR")} +${recentDamageScore}/20`
+    : "현재 시즌 최근 랭크 기록 없음";
+  breakdown.set("최근 폼", [formScore, 40, formDetail]);
   score += formScore;
 
   let scoutingScore = 0;
@@ -197,30 +265,74 @@ function calculateScore(stats, recentGames) {
     scoutingScore =
       averageScouting >= 6 ? 5 : averageScouting >= 4 ? 4 : averageScouting >= 2.5 ? 3 : averageScouting >= 1 ? 1 : 0;
   }
-  breakdown.set("시야·정찰 활동", [scoutingScore, 5]);
+  const scoutingDetail = recentGames.length
+    ? `경기당 평균 ${(
+        recentGames.reduce((sum, game) => sum + scoutingActivity(game), 0) /
+        recentGames.length
+      ).toFixed(2)}회 · ${scoutingScore}점 구간`
+    : "현재 시즌 최근 랭크 기록 없음";
+  breakdown.set("시야·정찰 활동", [scoutingScore, 5, scoutingDetail]);
   score += scoutingScore;
 
   let penalties = 0;
+  const penaltyReasons = [];
   if (totalGames >= 50) {
-    penalties += winRate < 0.08 ? 12 : winRate < 0.1 ? 7 : 0;
+    if (winRate < 0.08) {
+      penalties += 12;
+      penaltyReasons.push("승률 8% 미만 -12");
+    } else if (winRate < 0.1) {
+      penalties += 7;
+      penaltyReasons.push("승률 10% 미만 -7");
+    }
   }
   if (recentGames.length) {
     if (recentGames.length >= 10) {
-      penalties += averageRecentRank > 5.8 ? 10 : averageRecentRank > 5.3 ? 5 : 0;
-      penalties += averageRecentDamage < 7000 ? 8 : averageRecentDamage < 8000 ? 4 : 0;
+      if (averageRecentRank > 5.8) {
+        penalties += 10;
+        penaltyReasons.push(`최근 평균 ${averageRecentRank.toFixed(2)}위 -10`);
+      } else if (averageRecentRank > 5.3) {
+        penalties += 5;
+        penaltyReasons.push(`최근 평균 ${averageRecentRank.toFixed(2)}위 -5`);
+      }
+      if (averageRecentDamage < 7000) {
+        penalties += 8;
+        penaltyReasons.push(
+          `최근 피해량 ${Math.round(averageRecentDamage).toLocaleString("ko-KR")} -8`,
+        );
+      } else if (averageRecentDamage < 8000) {
+        penalties += 4;
+        penaltyReasons.push(
+          `최근 피해량 ${Math.round(averageRecentDamage).toLocaleString("ko-KR")} -4`,
+        );
+      }
     }
-    if (averageRank > 5.2 && averageRecentRank > 5.8) penalties += 8;
+    if (averageRank > 5.2 && averageRecentRank > 5.8) {
+      penalties += 8;
+      penaltyReasons.push("시즌·최근 평균 순위 동시 저조 -8");
+    }
     if (
       recentGames.length >= 20 &&
       recentGames.slice(0, 20).filter((game) => (Number(game.gameRank) || 9) <= 3).length < 4
     ) {
       penalties += 5;
+      const recentTop3Count = recentGames
+        .slice(0, 20)
+        .filter((game) => (Number(game.gameRank) || 9) <= 3).length;
+      penaltyReasons.push(`최근 20경기 TOP 3 ${recentTop3Count}회 -5`);
     }
   }
 
+  const baseScore = score;
+  const rawPenalties = penalties;
   penalties = Math.min(penalties, 25);
   score = Math.max(0, score - penalties);
-  if (penalties) breakdown.set("위험 감점", [-penalties, 25]);
+  if (penalties) {
+    breakdown.set("위험 감점", [
+      -penalties,
+      25,
+      `${penaltyReasons.join(" · ")}${rawPenalties > 25 ? " · 최대 -25 적용" : ""}${baseScore < penalties ? " · 최종 점수 0점 하한 적용" : ""}`,
+    ]);
+  }
 
   let weakest = null;
   let weakestRatio = Infinity;
@@ -241,11 +353,12 @@ function calculateScore(stats, recentGames) {
     "시야·정찰 활동": "최근 시야·정찰 활동이 부족합니다.",
     "위험 감점": "닷지를 고려할 위험 지표가 감지됐습니다.",
   };
-  const scoreBreakdown = [...breakdown].map(([label, [value, maximum]]) => ({
+  const scoreBreakdown = [...breakdown].map(([label, [value, maximum, detail]]) => ({
     label,
     score: value,
     maxScore: maximum,
     isPenalty: label === "위험 감점",
+    detail,
   }));
   let comment = score >= 80 ? "전반적인 지표가 안정적입니다." : comments[weakest];
   if (score < 80 && weakest === "캐릭터 집중도") {

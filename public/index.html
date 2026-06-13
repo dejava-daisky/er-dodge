@@ -698,13 +698,38 @@
         }
 
         .receipt-row {
-            padding: 6px 0;
+            padding: 8px 0;
             font-size: 12px;
+        }
+
+        .receipt-item {
+            min-width: 0;
+        }
+
+        .receipt-item strong,
+        .receipt-item small {
+            display: block;
+        }
+
+        .receipt-item strong {
+            font-size: 12px;
+        }
+
+        .receipt-item small {
+            margin-top: 4px;
+            color: #6f6a60;
+            font-size: 10px;
+            font-weight: 500;
+            line-height: 1.4;
         }
 
         .receipt-row.penalty {
             color: #a32631;
             font-weight: 800;
+        }
+
+        .receipt-row.penalty .receipt-item small {
+            color: #8e3a42;
         }
 
         .receipt-row b,
@@ -1658,9 +1683,13 @@
         const penaltyRows = breakdown.filter(item => item.isPenalty);
         const baseScore = baseRows.reduce((sum, item) => sum + item.score, 0);
         const penaltyScore = penaltyRows.reduce((sum, item) => sum + Math.abs(item.score), 0);
+        const floorAdjustment = Math.max(0, penaltyScore - baseScore);
         const receiptRows = breakdown.map(item => `
             <div class="receipt-row ${item.isPenalty ? "penalty" : ""}">
-                <span>${escapeHtml(item.label)}${item.isPenalty ? "" : ` / ${item.maxScore}`}</span>
+                <span class="receipt-item">
+                    <strong>${escapeHtml(item.label)}${item.isPenalty ? "" : ` / ${item.maxScore}`}</strong>
+                    <small>${escapeHtml(item.detail || "산정 근거 없음")}</small>
+                </span>
                 <b>${item.score > 0 ? "+" : ""}${item.score}점</b>
             </div>
         `).join("");
@@ -1700,6 +1729,12 @@
                             <span>위험 감점</span>
                             <b>-${penaltyScore}점</b>
                         </div>
+                        ${floorAdjustment ? `
+                            <div class="receipt-total-row">
+                                <span>0점 하한 보정</span>
+                                <b>+${floorAdjustment}점</b>
+                            </div>
+                        ` : ""}
                         <div class="receipt-total-row final">
                             <span>FINAL SCORE</span>
                             <b>${player.score} / 100</b>
