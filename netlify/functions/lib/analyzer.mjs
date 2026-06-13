@@ -94,8 +94,13 @@ async function getSeasonStats(uid, seasonId) {
   return data.userStats[0];
 }
 
-function recentRankGames(games, count = 20) {
-  return games.filter((game) => game.matchingMode === 3).slice(0, count);
+function recentRankGames(games, seasonId, count = 20) {
+  return games
+    .filter(
+      (game) =>
+        game.matchingMode === 3 && Number(game.seasonId) === Number(seasonId),
+    )
+    .slice(0, count);
 }
 
 function scoutingActivity(game) {
@@ -314,7 +319,7 @@ export async function evaluatePlayer(nickname) {
   const games = await getGames(uid);
   const season = getRankSeasonFromGames(games);
   const stats = await getSeasonStats(uid, season);
-  const recent = recentRankGames(games);
+  const recent = recentRankGames(games, season);
   const [score, comment, scoreBreakdown] = calculateScore(stats, recent);
   const totalGames = Number(stats.totalGames);
   const mostUsedGames = Math.max(

@@ -740,6 +740,29 @@
             text-align: center;
         }
 
+        .receipt-image-wrap {
+            width: min(560px, 100%);
+            margin: 24px auto 4px;
+            text-align: center;
+        }
+
+        .receipt-image {
+            display: block;
+            width: 100%;
+            height: auto;
+            margin: 0 auto;
+            border: 0;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .receipt-image-note {
+            display: block;
+            margin-top: 13px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
         .patch-view,
         .score-view {
             margin-top: 18px;
@@ -1785,6 +1808,7 @@
                 throw new Error(data.error || "요청을 처리하지 못했습니다.");
             }
             myOutput.innerHTML = renderMyResult(data.result);
+            await convertReceiptToImage();
         } catch (error) {
             myError.textContent = error.message || "서버에 연결하지 못했습니다.";
             myEmpty.hidden = false;
@@ -1794,6 +1818,37 @@
             myLoading.classList.remove("visible");
         }
     });
+    async function convertReceiptToImage() {
+        const receipt = myOutput.querySelector(".score-receipt");
+        if (!receipt || typeof window.html2canvas !== "function") return;
+
+        try {
+            await document.fonts?.ready;
+            const canvas = await window.html2canvas(receipt, {
+                backgroundColor: null,
+                scale: Math.min(window.devicePixelRatio || 1, 2),
+                logging: false,
+                useCORS: true
+            });
+            const image = new Image();
+            image.className = "receipt-image";
+            image.alt = "점수 산정 영수증";
+            image.src = canvas.toDataURL("image/png");
+            image.draggable = false;
+
+            const wrap = document.createElement("div");
+            wrap.className = "receipt-image-wrap";
+            const note = document.createElement("small");
+            note.className = "receipt-image-note";
+            note.textContent = "이미지를 우클릭해 복사하거나 저장할 수 있습니다.";
+            wrap.append(image, note);
+            receipt.replaceWith(wrap);
+        } catch (error) {
+            console.error("영수증 이미지 생성 실패", error);
+        }
+    }
+
 </script>
+<script src="/static/vendor/html2canvas.min.js"></script>
 </body>
 </html>
