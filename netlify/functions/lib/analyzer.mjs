@@ -1,6 +1,7 @@
 const BASE_URL = "https://open-api.bser.io";
 const REQUEST_INTERVAL_MS = 1100;
 const REQUEST_TIMEOUT_MS = 10000;
+let currentSeasonIdCache = null;
 
 export class AnalyzerError extends Error {}
 
@@ -78,12 +79,27 @@ async function getGames(uid) {
 
 function getRankSeasonFromGames(games) {
   const game = games.find(
-    (item) => item.matchingMode === 3 && Number(item.seasonId) > 0,
+    (item) => Number(item.matchingMode) === 3 && Number(item.seasonId) > 0,
   );
-  if (!game) {
-    throw new AnalyzerError("최근 90일 내 랭크 전적을 찾을 수 없습니다.");
+  return game ? Number(game.seasonId) : null;
+}
+
+async function getCurrentSeasonId() {
+  if (currentSeasonIdCache != null) return currentSeasonIdCache;
+
+  const data = await safeGet("/v2/data/Season");
+  if (!Array.isArray(data.data)) {
+    throw new AnalyzerError("현재 시즌 정보를 불러오지 못했습니다.");
   }
-  return game.seasonId;
+
+  const current = data.data.find((season) => Number(season.isCurrent) === 1);
+  const seasonId = Number(current?.seasonID ?? current?.seasonId);
+  if (!Number.isInteger(seasonId) || seasonId <= 0) {
+    throw new AnalyzerError("현재 시즌 정보를 찾을 수 없습니다.");
+  }
+
+  currentSeasonIdCache = seasonId;
+  return currentSeasonIdCache;
 }
 
 async function getSeasonStats(uid, seasonId) {
@@ -98,7 +114,8 @@ function recentRankGames(games, seasonId, count = 20) {
   return games
     .filter(
       (game) =>
-        game.matchingMode === 3 && Number(game.seasonId) === Number(seasonId),
+        Number(game.matchingMode) === 3 &&
+        Number(game.seasonId) === Number(seasonId),
     )
     .slice(0, count);
 }
@@ -441,7 +458,7 @@ export function cleanNickname(value) {
 export async function evaluatePlayer(nickname) {
   const uid = await getUid(nickname);
   const games = await getGames(uid);
-  const season = getRankSeasonFromGames(games);
+  const season = getRankSeasonFromGames(games) ?? await getCurrentSeasonId();
   const stats = await getSeasonStats(uid, season);
   const recent = recentRankGames(games, season);
   const [score, comment, scoreBreakdown] = calculateScore(stats, recent);
