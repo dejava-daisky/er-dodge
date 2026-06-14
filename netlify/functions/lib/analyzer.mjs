@@ -103,6 +103,17 @@ function recentRankGames(games, seasonId, count = 20) {
     .slice(0, count);
 }
 
+function formatIngameSeason(seasonId) {
+  const internalId = Number(seasonId);
+  if (!Number.isInteger(internalId)) return "시즌 정보 없음";
+
+  // Open API counts nine legacy seasons before the current in-game numbering.
+  const internalSeason = Math.floor(internalId / 2) + 1;
+  const ingameSeason = internalSeason - 9;
+  if (ingameSeason <= 0) return `레거시 시즌 (ID ${internalId})`;
+  return `${internalId % 2 === 0 ? "프리시즌" : "시즌"} ${ingameSeason}`;
+}
+
 function scoutingActivity(game) {
   return [
     "useSecurityConsole",
@@ -448,6 +459,7 @@ export async function evaluatePlayer(nickname) {
     scoreBreakdown,
     metrics: {
       seasonId: season,
+      seasonLabel: formatIngameSeason(season),
       totalGames,
       winRate: round((Number(stats.totalWins) / totalGames) * 100, 1),
       averageRank: round(Number(stats.averageRank), 2),

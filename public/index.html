@@ -1701,7 +1701,7 @@
                     <h2>${escapeHtml(player.nickname)}</h2>
                 </section>
                 <div class="my-metrics">
-                    ${metricCard("SEASON ID", metrics.seasonId, "분석 대상 시즌")}
+                    ${metricCard("RANK SEASON", metrics.seasonLabel || `시즌 ID ${metrics.seasonId}`, "인게임 기준 시즌")}
                     ${metricCard("TOTAL RANK GAMES", metrics.totalGames.toLocaleString("ko-KR"), "시즌 랭크 경기 수")}
                     ${metricCard("WIN RATE", `${metrics.winRate}%`, "시즌 우승 비율")}
                     ${metricCard("AVERAGE RANK", `${metrics.averageRank}위`, "시즌 전체 평균")}
