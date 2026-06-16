@@ -156,16 +156,9 @@
 
         .fields {
             display: grid;
-            grid-template-columns: 1fr 36px 1fr 132px;
+            grid-template-columns: 1fr 1fr 132px;
             gap: 10px;
             align-items: stretch;
-        }
-
-        .versus {
-            display: grid;
-            place-items: center;
-            color: #545a65;
-            font: 900 11px ui-monospace, SFMono-Regular, Consolas, monospace;
         }
 
         .field { position: relative; }
@@ -257,6 +250,18 @@
             padding: 0 18px 18px;
         }
 
+        .service-disclaimer {
+            margin: 0 18px 18px;
+            padding: 12px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.65;
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .service-disclaimer strong { color: #c9ced6; }
+
         .empty-state {
             display: grid;
             min-height: 376px;
@@ -323,7 +328,7 @@
         .traffic-signal {
             display: flex;
             width: 122px;
-            height: 176px;
+            height: 132px;
             padding: 15px 20px;
             flex-direction: column;
             gap: 10px;
@@ -348,11 +353,9 @@
         }
 
         .signal-red { background: var(--red); }
-        .signal-yellow { background: var(--yellow); }
         .signal-green { background: var(--green); }
 
         .signal-dodge .signal-red,
-        .signal-caution .signal-yellow,
         .signal-proceed .signal-green {
             opacity: 1;
             filter: saturate(1.15) brightness(1.12);
@@ -360,10 +363,6 @@
 
         .signal-dodge .signal-red {
             box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.25), 0 0 22px var(--red);
-        }
-
-        .signal-caution .signal-yellow {
-            box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.25), 0 0 22px var(--yellow);
         }
 
         .signal-proceed .signal-green {
@@ -445,7 +444,7 @@
             --team-color: #4d535e;
             display: flex;
             width: 100%;
-            aspect-ratio: 1 / 1.17;
+            aspect-ratio: 1 / 0.82;
             flex-direction: column;
             gap: 16px;
             align-items: center;
@@ -621,6 +620,25 @@
             font-size: 10px;
         }
 
+        .tier-comparison { padding: 20px; border: 1px solid var(--line); background: #0d0f14; }
+        .comparison-head { display: flex; gap: 12px; align-items: end; justify-content: space-between; margin-bottom: 14px; }
+        .comparison-head h3 { margin: 0; font-size: 16px; }
+        .comparison-head p { margin: 0; color: var(--muted); font-size: 10px; text-align: right; }
+        .comparison-list { display: grid; gap: 8px; }
+        .comparison-row {
+            display: grid;
+            grid-template-columns: minmax(90px, 1.1fr) repeat(4, minmax(90px, 1fr));
+            gap: 8px;
+            padding: 12px;
+            border: 1px solid #252a32;
+            background: #101319;
+        }
+        .comparison-character strong, .comparison-stat strong { display: block; color: var(--white); font-size: 13px; }
+        .comparison-character small, .comparison-stat small { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; }
+        .comparison-stat .better { color: #63d792; }
+        .comparison-stat .worse { color: #ff7885; }
+        .comparison-stat .neutral { color: var(--muted); }
+
         .my-summary {
             grid-column: 1 / -1;
             min-height: auto;
@@ -763,6 +781,32 @@
             font-size: 11px;
             line-height: 1.55;
             text-align: center;
+        }
+
+        .sample-notice {
+            width: min(720px, 100%);
+            margin: 20px auto 4px;
+            padding: 18px 20px;
+            border: 1px solid rgba(255, 196, 92, 0.32);
+            color: #c9c3b7;
+            background: rgba(255, 196, 92, 0.06);
+        }
+
+        .sample-notice strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #f1d89f;
+            font-size: 13px;
+        }
+
+        .sample-notice p {
+            margin: 0;
+            font-size: 11px;
+            line-height: 1.75;
+        }
+
+        .sample-notice b {
+            color: var(--white);
         }
 
         .receipt-image-wrap {
@@ -1055,6 +1099,8 @@
             font-size: 11px;
         }
 
+        .score-view .score-section { display: none; }
+        .score-view .active-score-section { display: block; }
         .score-section + .score-section { margin-top: 22px; }
         .score-section h3 {
             margin: 0 0 10px;
@@ -1107,6 +1153,8 @@
             .legend { grid-column: 2; margin-top: -40px; }
             .my-dashboard { grid-template-columns: 200px minmax(0, 1fr); }
             .my-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .comparison-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .comparison-character { grid-column: 1 / -1; }
             .patch-layout { grid-template-columns: 1fr; }
             .patch-list { max-height: none; }
         }
@@ -1119,17 +1167,20 @@
             .view-tabs { flex-wrap: wrap; }
             .view-tab { padding: 0 9px; font-size: 10px; }
             .fields { grid-template-columns: 1fr; }
-            .versus { height: 14px; }
             .submit-button { height: 52px; }
             .results { grid-template-columns: 1fr; }
             .card-main { grid-template-columns: 105px minmax(0, 1fr); gap: 18px; }
-            .traffic-signal { width: 105px; height: 154px; }
+            .traffic-signal { width: 105px; height: 120px; }
             .team-body { grid-template-columns: 130px 1fr; }
             .legend { grid-column: 1 / -1; margin-top: 0; }
             .my-form,
             .my-dashboard { grid-template-columns: 1fr; }
             .my-form .submit-button { height: 52px; }
             .my-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .comparison-head { align-items: flex-start; flex-direction: column; }
+            .comparison-head p { text-align: left; }
+            .comparison-row { grid-template-columns: 1fr; }
+            .comparison-character { grid-column: auto; }
         }
     </style>
 </head>
@@ -1167,7 +1218,6 @@
                         <input id="nickname-1" maxlength="30" autocomplete="off"
                                placeholder="첫 번째 닉네임">
                     </div>
-                    <span class="versus">VS</span>
                     <div class="field">
                         <label for="nickname-2">TEAMMATE 02 / OPTIONAL</label>
                         <input id="nickname-2" maxlength="30" autocomplete="off"
@@ -1192,6 +1242,10 @@
                 </div>
                 <section id="results" class="results" aria-live="polite"></section>
             </div>
+            <p class="service-disclaimer">
+                <strong>안내:</strong> 닷지 추천은 공개 전적을 바탕으로 제공하는 사이트의 참고 기능입니다.
+                실제 닷지를 종용하거나 강제하지 않으며, 최종 판단과 선택은 이용자에게 있습니다.
+            </p>
         </section>
 
         <aside class="team-panel">
@@ -1202,7 +1256,6 @@
             <div class="team-body">
                 <div id="team-signal" class="team-signal" aria-label="팀 판정 신호등">
                     <i class="signal-light signal-red"></i>
-                    <i class="signal-light signal-yellow"></i>
                     <i class="signal-light signal-green"></i>
                 </div>
                 <div class="team-result">
@@ -1213,21 +1266,15 @@
                 <div class="legend">
                     <div class="legend-row">
                         <span class="legend-label">
-                            <i class="legend-light" style="--light: var(--green)"></i>진행
+                            <i class="legend-light" style="--light: var(--green)"></i>좋음 / NOT DODGE
                         </span>
-                        <span>70+</span>
+                        <span>55-100</span>
                     </div>
                     <div class="legend-row">
                         <span class="legend-label">
-                            <i class="legend-light" style="--light: var(--yellow)"></i>주의
+                            <i class="legend-light" style="--light: var(--red)"></i>닷지 추천
                         </span>
-                        <span>35-69</span>
-                    </div>
-                    <div class="legend-row">
-                        <span class="legend-label">
-                            <i class="legend-light" style="--light: var(--red)"></i>닷지
-                        </span>
-                        <span>0-34</span>
+                        <span>0-54</span>
                     </div>
                 </div>
             </div>
@@ -1287,7 +1334,7 @@
 
     <section id="score-view" class="score-view" hidden>
         <div class="dialog-header">
-            <h2>점수 산정표 / 100점</h2>
+            <h2>점수 산정표 / 100점 감점제</h2>
         </div>
         <div class="score-content">
         <section class="score-section">
@@ -1364,9 +1411,9 @@
             </table>
         </section>
         <section class="score-section">
-            <h3>위험 지표 감점 / 최대 -25점</h3>
+            <h3>추가 감점 기준 / 최대 -25점</h3>
             <table class="score-table">
-                <tr><th>위험 지표</th><th>감점</th></tr>
+                <tr><th>확인 지표</th><th>감점</th></tr>
                 <tr><td>50경기 이상 · 승률 8% 미만</td><td>-12점</td></tr>
                 <tr><td>50경기 이상 · 승률 10% 미만</td><td>-7점</td></tr>
                 <tr><td>최근 10경기 이상 · 평균 순위 5.8위 초과</td><td>-10점</td></tr>
@@ -1377,10 +1424,120 @@
                 <tr><td>최근 20게임 중 Top 3 4회 미만</td><td>-5점</td></tr>
             </table>
         </section>
+        <section class="score-section active-score-section">
+            <h3>최종 100점 감점표</h3>
+            <table class="score-table">
+                <tr><th>영역</th><th>배점 / 최대 감점</th></tr>
+                <tr><td>캐릭터 성과</td><td>25점 / -23</td></tr>
+                <tr><td>승률</td><td>20점 / -20</td></tr>
+                <tr><td>TOP3</td><td>25점 / -25</td></tr>
+                <tr><td>시야점수</td><td>10점 / -10</td></tr>
+                <tr><td>평균순위</td><td>20점 / -20</td></tr>
+                <tr><td>최종 판정</td><td>55점 미만 DODGE</td></tr>
+            </table>
+        </section>
+        <section class="score-section active-score-section">
+            <h3>티어 평균 산출 방식</h3>
+            <table class="score-table">
+                <tr><th>지표</th><th>계산 방식</th></tr>
+                <tr><td>승률</td><td>시즌 전체 승률의 절대 구간 기준</td></tr>
+                <tr><td>티어 전체 TOP3</td><td>Σ(캐릭터 경기 수 × 캐릭터 TOP3) ÷ Σ경기 수</td></tr>
+                <tr><td>티어 전체 시야</td><td>Σ(캐릭터 경기 수 × 캐릭터 평균 시야) ÷ Σ경기 수</td></tr>
+                <tr><td>캐릭터 성과 기대값</td><td>같은 티어·같은 캐릭터의 평균 피해량 및 TK</td></tr>
+            </table>
+            <p class="score-note">
+                캐릭터 수로 단순 평균하지 않고 실제 경기 수로 가중합니다.
+                승률과 TOP3는 시즌 전체 수치, 피해량·TK·시야는 API에서 확인된 최근 랭크 최대 20경기를 사용합니다.
+            </p>
+        </section>
+        <section class="score-section active-score-section">
+            <h3>캐릭터 성과 / 25점</h3>
+            <p class="score-note">
+                시즌 전체 10판 이상 사용한 캐릭터 중 최근 랭크에서 3판 이상 확인된 캐릭터를 평가합니다.
+                평균 피해량 70%와 TK 30%를 사용하며, TK가 없으면 평균 피해량만 사용합니다.
+                각 캐릭터의 실제값을 같은 티어·캐릭터 평균 기대값과 비교합니다.
+                캐릭터별 감점에 해당 캐릭터의 최근 랭크 판수 비율을 곱해 합산하고 최대 23점까지만 감점합니다.
+            </p>
+            <table class="score-table">
+                <tr><th>티어</th><th>감점 없음 / 약 / 중 / 큰 / 심함</th></tr>
+                <tr><td>Iron·Bronze</td><td>100 / 98 / 94 / 88% · 0/5/10/17/23</td></tr>
+                <tr><td>Silver·Gold</td><td>100 / 97 / 92 / 86% · 0/5/10/17/23</td></tr>
+                <tr><td>Platinum</td><td>100 / 95 / 89 / 83% · 0/5/10/17/23</td></tr>
+                <tr><td>Diamond+</td><td>100 / 93 / 86 / 80% · 0/5/10/17/23</td></tr>
+                <tr><td>Meteorite+</td><td>100 / 92 / 84 / 78% · 0/5/10/17/23</td></tr>
+                <tr><td>Mythril+·Top 1000</td><td>100 / 90 / 82 / 76% · 0/5/10/17/23</td></tr>
+            </table>
+        </section>
+        <section class="score-section active-score-section">
+            <h3>승률 / 20점</h3>
+            <table class="score-table">
+                <tr><th>시즌 전체 승률</th><th>남는 점수 / 감점</th></tr>
+                <tr><td>15% 이상</td><td>20점 / 0</td></tr>
+                <tr><td>12% 이상 ~ 15% 미만</td><td>16점 / -4</td></tr>
+                <tr><td>10% 이상 ~ 12% 미만</td><td>11점 / -9</td></tr>
+                <tr><td>8% 이상 ~ 10% 미만</td><td>5점 / -15</td></tr>
+                <tr><td>8% 미만</td><td>0점 / -20</td></tr>
+            </table>
+            <p class="score-note">
+                티어 평균과 비교하지 않고 시즌 전체 승률 자체를 평가합니다.
+                15% 이상은 감점하지 않으며, 한 자리 승률은 구간에 따라 크게 감점합니다.
+            </p>
+        </section>
+        <section class="score-section active-score-section">
+            <h3>TOP3 / 25점</h3>
+            <p class="score-note">
+                시즌 전체 TOP3의 절대 기준과 판수 가중 티어 평균 대비를 모두 계산하고,
+                둘 중 더 큰 감점을 적용합니다.
+            </p>
+            <table class="score-table">
+                <tr><th>절대 TOP3</th><th>감점</th></tr>
+                <tr><td>45% 이상</td><td>0</td></tr>
+                <tr><td>40% 이상 ~ 45% 미만</td><td>-5</td></tr>
+                <tr><td>35% 이상 ~ 40% 미만</td><td>-10</td></tr>
+                <tr><td>30% 이상 ~ 35% 미만</td><td>-17</td></tr>
+                <tr><td>30% 미만</td><td>-25</td></tr>
+            </table>
+            <table class="score-table">
+                <tr><th>티어 평균과 차이</th><th>감점</th></tr>
+                <tr><td>-3%p 이내</td><td>0</td></tr>
+                <tr><td>-3%p 미만 ~ -6%p 이상</td><td>-5</td></tr>
+                <tr><td>-6%p 미만 ~ -10%p 이상</td><td>-10</td></tr>
+                <tr><td>-10%p 미만 ~ -15%p 이상</td><td>-17</td></tr>
+                <tr><td>-15%p 초과 낮음</td><td>-25</td></tr>
+            </table>
+        </section>
+        <section class="score-section active-score-section">
+            <h3>시야점수 / 10점</h3>
+            <table class="score-table">
+                <tr><th>티어</th><th>성과율 경계</th></tr>
+                <tr><td>Iron·Bronze</td><td>100/94/86/75%</td></tr>
+                <tr><td>Silver·Gold</td><td>100/98/92/84%</td></tr>
+                <tr><td>Platinum</td><td>100/96/90/82%</td></tr>
+                <tr><td>Diamond+</td><td>100/94/87/79%</td></tr>
+                <tr><td>Meteorite+</td><td>100/92/85/77%</td></tr>
+                <tr><td>Mythril+·Top 1000</td><td>100/90/82/74%</td></tr>
+            </table>
+            <p class="score-note">
+                최근 랭크 평균 시야 ÷ 판수 가중 티어 평균 시야의 성과율을 사용합니다.
+                배점은 10점이며 감점값은 0/2/4/7/10입니다.
+            </p>
+        </section>
+        <section class="score-section active-score-section">
+            <h3>평균순위 / 20점</h3>
+            <table class="score-table">
+                <tr><th>시즌 전체 평균순위</th><th>점수 / 감점</th></tr>
+                <tr><td>3.7위 이하</td><td>20점 / 0</td></tr>
+                <tr><td>3.7위 초과 ~ 3.9위 이하</td><td>15점 / -5</td></tr>
+                <tr><td>3.9위 초과 ~ 4.3위 이하</td><td>10점 / -10</td></tr>
+                <tr><td>4.3위 초과 ~ 4.7위 미만</td><td>5점 / -15</td></tr>
+                <tr><td>4.7위 이상</td><td>0점 / -20</td></tr>
+            </table>
+            <p class="score-note">티어와 무관한 절대 순위 기준이며, 순위는 낮을수록 좋습니다.</p>
+        </section>
         <p class="score-note">
-            기본 배점은 총 100점이며, 위험 지표에 따라 최대 25점이 감점됩니다.
-            판정 기준: 진행 70점 이상, 주의 35점 이상, 닷지 권장 35점 미만입니다.
-            등급은 최고 85점 이상, 좋음 70점 이상, 보통 50점 이상으로 구분합니다.
+            현재 계산은 100점에서 다섯 영역의 감점을 차감하는 방식입니다.
+            최종 판정 기준은 좋음 55점 이상, 닷지 추천 55점 미만입니다.
+            NaN·결측·0점 오류 의심 항목은 감점하지 않으며, 전체 랭크 20판 미만 또는 비교 데이터 부족은 NOT DODGE입니다.
         </p>
         </div>
     </section>
@@ -1424,18 +1581,16 @@
         return element.innerHTML;
     }
 
-    function signalFor(score) {
-        if (score >= 70) return {color: "#55e39b", label: "PROCEED"};
-        if (score >= 35) return {color: "#ffc45c", label: "CAUTION"};
-        return {color: "#ff5d6c", label: "DODGE"};
+    function signalFor(score, protectedVerdict = false) {
+        if (protectedVerdict) return {color: "#55e39b", key: "proceed", label: "NOT DODGE"};
+        if (score >= 55) return {color: "#55e39b", key: "proceed", label: "좋음"};
+        return {color: "#ff5d6c", key: "dodge", label: "닷지 추천"};
     }
 
-    function trafficSignalMarkup(signalLabel) {
-        const signalClass = signalLabel.toLowerCase();
+    function trafficSignalMarkup(signal) {
         return `
-            <div class="traffic-signal signal-${signalClass}" aria-label="${signalLabel} 신호">
+            <div class="traffic-signal signal-${signal.key}" aria-label="${signal.label} 신호">
                 <i class="signal-light signal-red"></i>
-                <i class="signal-light signal-yellow"></i>
                 <i class="signal-light signal-green"></i>
             </div>
         `;
@@ -1596,7 +1751,32 @@
             `;
         }
 
-        const signal = signalFor(player.score);
+        if (player.analysisStatus === "no_recent_rank") {
+            const pendingSignal = {
+                color: "#a7a2aa",
+                key: "pending",
+                label: "분석 보류"
+            };
+            return `
+                <article class="player-card" style="--signal: ${pendingSignal.color}">
+                    <span class="card-index">TEAMMATE 0${index + 1} / NO RECENT RANK</span>
+                    <div class="card-main">
+                        ${trafficSignalMarkup(pendingSignal)}
+                        <div>
+                            <h2 class="player-name">${nickname}</h2>
+                            <div class="score">--<small>/100</small></div>
+                            <div class="grade">분석 보류</div>
+                        </div>
+                    </div>
+                    <p class="comment">최근 20게임 안에 랭크게임이 확인되지 않습니다.</p>
+                    <div class="warnings">
+                        <span class="warning">최근에는 일반게임을 이용한 것으로 보입니다.</span>
+                    </div>
+                </article>
+            `;
+        }
+
+        const signal = signalFor(player.score, player.dodgeProtected);
         const warnings = player.warnings.length
             ? `<div class="warnings">${player.warnings.map(
                 warning => `<span class="warning">${escapeHtml(warning)}</span>`
@@ -1607,11 +1787,11 @@
             <article class="player-card" style="--signal: ${signal.color}">
                 <span class="card-index">TEAMMATE 0${index + 1} / ANALYZED</span>
                 <div class="card-main">
-                    ${trafficSignalMarkup(signal.label)}
+                    ${trafficSignalMarkup(signal)}
                     <div>
                         <h2 class="player-name">${nickname}</h2>
                         <div class="score">${player.score}<small>/100</small></div>
-                        <div class="grade">${signal.label} · ${escapeHtml(player.grade)}</div>
+                        <div class="grade">${escapeHtml(player.grade)}</div>
                     </div>
                 </div>
                 <p class="comment">${escapeHtml(player.comment)}</p>
@@ -1622,7 +1802,7 @@
 
     function updateTeamSignal(players) {
         const validPlayers = players.filter(player => !player.error);
-        teamSignal.classList.remove("signal-proceed", "signal-caution", "signal-dodge");
+        teamSignal.classList.remove("signal-proceed", "signal-dodge");
         if (!validPlayers.length || validPlayers.length !== players.length) {
             teamSignal.classList.add("signal-dodge");
             teamSignal.style.setProperty("--team-color", "#ff5d6c");
@@ -1632,21 +1812,32 @@
             return;
         }
 
-        const lowestScore = Math.min(...validPlayers.map(player => player.score));
+        if (validPlayers.some(player => player.analysisStatus === "no_recent_rank")) {
+            teamSignal.style.setProperty("--team-color", "#a7a2aa");
+            teamVerdict.style.setProperty("--team-color", "#a7a2aa");
+            teamVerdict.textContent = "분석 보류";
+            teamDescription.textContent =
+                "최근 20게임 안에 랭크게임이 확인되지 않는 대상이 있어 점수를 산출하지 않았습니다.";
+            return;
+        }
+
+        const effectiveScores = validPlayers.map(player =>
+            player.dodgeProtected ? 100 : player.score
+        );
+        const lowestScore = Math.min(...effectiveScores);
         const signal = signalFor(lowestScore);
         const descriptions = {
-            PROCEED: validPlayers.length === 1
-                ? "해당 팀원은 진행 가능한 범위입니다."
-                : "두 팀원 모두 진행 가능한 범위입니다.",
-            CAUTION: "주의가 필요한 팀원이 있습니다.",
-            DODGE: "위험 신호가 감지되었습니다."
+            proceed: validPlayers.length === 1
+                ? "해당 팀원의 지표가 좋습니다."
+                : "두 팀원 모두 좋은 지표를 보입니다.",
+            dodge: "함께 플레이하기 전 세부 지표 확인을 권장합니다."
         };
 
-        teamSignal.classList.add(`signal-${signal.label.toLowerCase()}`);
+        teamSignal.classList.add(`signal-${signal.key}`);
         teamSignal.style.setProperty("--team-color", signal.color);
         teamVerdict.style.setProperty("--team-color", signal.color);
         teamVerdict.textContent = signal.label;
-        teamDescription.textContent = descriptions[signal.label];
+        teamDescription.textContent = descriptions[signal.key];
     }
 
     function metricCard(label, value, note) {
@@ -1656,6 +1847,65 @@
                 <strong>${value}</strong>
                 <small>${note}</small>
             </article>
+        `;
+    }
+
+    function metricValue(value, suffix = "") {
+        return value === null || value === undefined
+            ? "데이터 없음"
+            : `${value}${suffix}`;
+    }
+
+    function signed(value, digits = 1) {
+        if (value === null || !Number.isFinite(value)) return "-";
+        const rounded = Number(value.toFixed(digits));
+        return `${rounded > 0 ? "+" : ""}${rounded}`;
+    }
+
+    function comparisonStat(label, mine, baseline, delta, betterWhenLower = false) {
+        if (mine === null || !Number.isFinite(delta)) {
+            return `<div class="comparison-stat"><strong>-</strong><small>${label} · 최근 표본 없음</small></div>`;
+        }
+        const better = betterWhenLower ? delta < 0 : delta > 0;
+        const tone = Math.abs(delta) < 0.0005 ? "neutral" : better ? "better" : "worse";
+        return `
+            <div class="comparison-stat">
+                <strong>${mine}</strong>
+                <small>${label} · 평균 ${baseline} · <span class="${tone}">${signed(delta)}</span></small>
+            </div>
+        `;
+    }
+
+    function comparisonMarkup(comparison) {
+        if (!comparison?.characters?.length) return "";
+        const rows = comparison.characters.map(character => {
+            const win = character.winRate * 100;
+            const baselineWin = character.baselineWinRate * 100;
+            const top3 = character.top3Rate * 100;
+            const baselineTop3 = character.baselineTop3Rate * 100;
+            const damage = character.averageDamage === null ? null : Math.round(character.averageDamage);
+            const baselineDamage = Math.round(character.baselineAverageDamage);
+            return `
+                <div class="comparison-row">
+                    <div class="comparison-character">
+                        <strong>${escapeHtml(character.characterName)}</strong>
+                        <small>시즌 ${character.games.toLocaleString("ko-KR")}판 · 티어 표본 ${character.baselineGames.toLocaleString("ko-KR")}판</small>
+                    </div>
+                    ${comparisonStat("승률", `${win.toFixed(1)}%`, `${baselineWin.toFixed(1)}%`, win - baselineWin)}
+                    ${comparisonStat("TOP 3", `${top3.toFixed(1)}%`, `${baselineTop3.toFixed(1)}%`, top3 - baselineTop3)}
+                    ${comparisonStat("평균 순위", `${Number(character.averagePlacement).toFixed(2)}위`, `${character.baselineAveragePlacement.toFixed(2)}위`, character.averagePlacementDelta, true)}
+                    ${comparisonStat("최근 딜량", damage === null ? null : damage.toLocaleString("ko-KR"), baselineDamage.toLocaleString("ko-KR"), character.averageDamageDelta)}
+                </div>
+            `;
+        }).join("");
+        return `
+            <section class="tier-comparison" aria-label="티어 및 실험체 평균 비교">
+                <div class="comparison-head">
+                    <h3>모스트 실험체 티어 대비</h3>
+                    <p>${escapeHtml(comparison.tierLabel)} 통계 · 최근 ${comparison.periodDays}일 · 패치 ${comparison.sourcePatch}</p>
+                </div>
+                <div class="comparison-list">${rows}</div>
+            </section>
         `;
     }
 
@@ -1671,6 +1921,32 @@
         }
 
         const metrics = player.metrics;
+        if (player.analysisStatus === "no_recent_rank") {
+            return `
+                <div class="my-dashboard raw-dashboard">
+                    <section class="my-record-header">
+                        <span>RECENT RANK DATA NOT FOUND</span>
+                        <h2>${escapeHtml(player.nickname)}</h2>
+                    </section>
+                    <div class="my-metrics">
+                        ${metricCard("RANK SEASON", metrics.seasonLabel || `시즌 ID ${metrics.seasonId}`, "인게임 기준 시즌")}
+                        ${metricCard("TOTAL RANK GAMES", metrics.totalGames.toLocaleString("ko-KR"), "시즌 전체 랭크 경기")}
+                        ${metricCard("WIN RATE", metricValue(metrics.winRate, "%"), "시즌 우승 비율")}
+                        ${metricCard("AVERAGE RANK", metricValue(metrics.averageRank, "위"), "시즌 전체 평균")}
+                        ${metricCard("TOP 3 RATE", metricValue(metrics.top3Rate, "%"), "3위 이내 진입")}
+                        ${metricCard("RECENT RANK GAMES", "0", `최근 수집한 ${metrics.fetchedGames}경기 기준`)}
+                    </div>
+                    <aside class="sample-notice" aria-label="최근 랭크 안내">
+                        <strong>분석 보류</strong>
+                        <p>
+                            <b>최근 20게임 안에 랭크게임이 확인되지 않습니다.</b>
+                            최근에는 일반게임을 이용한 것으로 보이며, 최근 랭크 표본이 없어 점수를 산출하지 않았습니다.
+                        </p>
+                    </aside>
+                </div>
+            `;
+        }
+
         const recentRank = metrics.recentAverageRank ?? "-";
         const recentDamage = metrics.recentAverageDamage === null
             ? "-"
@@ -1679,20 +1955,28 @@
         const breakdown = Array.isArray(player.scoreBreakdown)
             ? player.scoreBreakdown
             : [];
-        const baseRows = breakdown.filter(item => !item.isPenalty);
-        const penaltyRows = breakdown.filter(item => item.isPenalty);
-        const baseScore = baseRows.reduce((sum, item) => sum + item.score, 0);
-        const penaltyScore = penaltyRows.reduce((sum, item) => sum + Math.abs(item.score), 0);
-        const floorAdjustment = Math.max(0, penaltyScore - baseScore);
-        const receiptRows = breakdown.map(item => `
+        const performanceDeduction = breakdown
+            .filter(item => !item.isPenalty)
+            .reduce((sum, item) => sum + Math.max(0, item.maxScore - item.score), 0);
+        const additionalDeduction = breakdown
+            .filter(item => item.isPenalty)
+            .reduce((sum, item) => sum + Math.abs(item.score), 0);
+        const totalDeduction = performanceDeduction + additionalDeduction;
+        const floorAdjustment = Math.max(0, totalDeduction - 100);
+        const receiptRows = breakdown.map(item => {
+            const deduction = item.isPenalty
+                ? Math.abs(item.score)
+                : Math.max(0, item.maxScore - item.score);
+            return `
             <div class="receipt-row ${item.isPenalty ? "penalty" : ""}">
                 <span class="receipt-item">
                     <strong>${escapeHtml(item.label)}${item.isPenalty ? "" : ` / ${item.maxScore}`}</strong>
                     <small>${escapeHtml(item.detail || "산정 근거 없음")}</small>
                 </span>
-                <b>${item.score > 0 ? "+" : ""}${item.score}점</b>
+                <b>${deduction ? `-${deduction}` : "0"}점</b>
             </div>
-        `).join("");
+        `;
+        }).join("");
 
         return `
             <div class="my-dashboard raw-dashboard">
@@ -1703,15 +1987,16 @@
                 <div class="my-metrics">
                     ${metricCard("RANK SEASON", metrics.seasonLabel || `시즌 ID ${metrics.seasonId}`, "인게임 기준 시즌")}
                     ${metricCard("TOTAL RANK GAMES", metrics.totalGames.toLocaleString("ko-KR"), "시즌 랭크 경기 수")}
-                    ${metricCard("WIN RATE", `${metrics.winRate}%`, "시즌 우승 비율")}
-                    ${metricCard("AVERAGE RANK", `${metrics.averageRank}위`, "시즌 전체 평균")}
-                    ${metricCard("TOP 3 RATE", `${metrics.top3Rate}%`, "3위 이내 진입")}
+                    ${metricCard("WIN RATE", metricValue(metrics.winRate, "%"), "시즌 우승 비율")}
+                    ${metricCard("AVERAGE RANK", metricValue(metrics.averageRank, "위"), "시즌 전체 평균")}
+                    ${metricCard("TOP 3 RATE", metricValue(metrics.top3Rate, "%"), "3위 이내 진입")}
                     ${metricCard("MAIN CHARACTER", `${metrics.mainCharacterRate}%`, "가장 많이 한 캐릭터 비율")}
                     ${metricCard("RECENT RANK GAMES", metrics.recentGames, "최근 기록에서 수집된 랭크 경기")}
                     ${metricCard("RECENT AVG RANK", `${recentRank}위`, "최근 랭크 경기 평균 순위")}
                     ${metricCard("RECENT AVG DAMAGE", recentDamage, "최근 랭크 경기 평균 플레이어 피해")}
-                    ${metricCard("RECENT SCOUTING", recentScouting, "평균 콘솔·카메라 설치·제거 횟수")}
+                    ${metricCard("RECENT VISION", recentScouting, "최근 경기 평균 시야 기여도")}
                 </div>
+                ${comparisonMarkup(player.comparison)}
                 <section class="score-receipt" aria-label="점수 산정 영수증">
                     <div class="receipt-head">
                         <strong>ER DODGE CHECK</strong>
@@ -1722,12 +2007,12 @@
                     </div>
                     <div class="receipt-totals">
                         <div class="receipt-total-row">
-                            <span>기본 획득점수</span>
-                            <b>${baseScore}점</b>
+                            <span>기준 점수</span>
+                            <b>100점</b>
                         </div>
                         <div class="receipt-total-row">
-                            <span>위험 감점</span>
-                            <b>-${penaltyScore}점</b>
+                            <span>항목별 감점</span>
+                            <b>-${performanceDeduction}점</b>
                         </div>
                         ${floorAdjustment ? `
                             <div class="receipt-total-row">
@@ -1744,6 +2029,17 @@
                         ${escapeHtml(player.grade)} · ${escapeHtml(player.comment)}
                     </p>
                 </section>
+                <aside class="sample-notice" aria-label="표본 보호 안내">
+                    <strong>표본 보호 안내</strong>
+                    <p>
+                        최근 최대 20경기를 분석 기준으로 확인하며,
+                        <b>${metrics.recentGames}/${metrics.fetchedGames}경기의 현재 시즌 랭크 표본</b>으로 최근 지표를 분석했습니다.
+                        최근 랭크 표본이 적으면 피해량과 시야 지표의 변동성이 커질 수 있으며,
+                        캐릭터 성과는 시즌 전체 10판 이상 사용했고 최근 랭크에서 3판 이상 확인된 캐릭터를 개별 평가합니다.
+                        결측값이나 0점 오류가 의심되는 항목은 감점하지 않으며,
+                        전체 랭크 20판 미만 또는 유효 평가 영역이 4개 미만이면 <b>NOT DODGE</b>로 보호합니다.
+                    </p>
+                </aside>
             </div>
         `;
     }

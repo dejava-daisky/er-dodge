@@ -3,3 +3,6 @@ node_modules/
 .env
 .netlify-dev.*.log
 deno.lock
+__pycache__/
+*.py[cod]
+data/dakgg_stats.sqlite3

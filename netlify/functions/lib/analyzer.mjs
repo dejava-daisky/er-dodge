@@ -1,3 +1,9 @@
+import {
+  compareMostCharacters,
+  getDakggStats,
+  tierForMmr,
+} from "./dakgg-stats.mjs";
+
 const BASE_URL = "https://open-api.bser.io";
 const REQUEST_INTERVAL_MS = 1100;
 const REQUEST_TIMEOUT_MS = 10000;
@@ -69,12 +75,33 @@ async function getUid(nickname) {
   return uid;
 }
 
-async function getGames(uid) {
+async function getGames(uid, count = 20) {
   const data = await safeGet(`/v1/user/games/uid/${uid}`);
   if (!Array.isArray(data.userGames)) {
     throw new AnalyzerError("경기 기록을 불러오지 못했습니다.");
   }
-  return data.userGames;
+
+  const games = [...data.userGames];
+  if (games.length < 10 || games.length >= count) return games.slice(0, count);
+
+  const nextGameId = games.at(-1)?.gameId;
+  if (nextGameId == null) return games.slice(0, count);
+
+  try {
+    const nextData = await safeGet(`/v1/user/games/uid/${uid}`, {
+      next: nextGameId,
+    });
+    if (Array.isArray(nextData.userGames)) {
+      const seenIds = new Set(games.map((game) => game.gameId));
+      games.push(
+        ...nextData.userGames.filter((game) => !seenIds.has(game.gameId)),
+      );
+    }
+  } catch (error) {
+    console.warn("Could not load the second match-history page:", error.message);
+  }
+
+  return games.slice(0, count);
 }
 
 function getRankSeasonFromGames(games) {
@@ -148,12 +175,9 @@ function validateStats(stats) {
   if (!Array.isArray(stats.characterStats) || !stats.characterStats.length) {
     throw new AnalyzerError("캐릭터 통계가 없어 분석할 수 없습니다.");
   }
-  if (stats.averageRank == null || stats.totalWins == null) {
-    throw new AnalyzerError("분석에 필요한 통계가 부족합니다.");
-  }
 }
 
-function calculateScore(stats, recentGames) {
+function legacyCalculateScore(stats, recentGames) {
   validateStats(stats);
 
   const totalGames = Number(stats.totalGames);
@@ -165,7 +189,6 @@ function calculateScore(stats, recentGames) {
   );
   const mostUsedRatio = mostUsed / totalGames;
   const breakdown = new Map();
-  let score = 0;
 
   const rankScore =
     averageRank <= 3.3 ? 15 : averageRank <= 3.8 ? 12 : averageRank <= 4.3 ? 8 : averageRank <= 4.8 ? 4 : 0;
@@ -180,7 +203,6 @@ function calculateScore(stats, recentGames) {
             ? "4.8위 이하"
             : "4.8위 초과";
   breakdown.set("평균 순위", [rankScore, 15, `${averageRank.toFixed(2)}위 · ${rankRule}`]);
-  score += rankScore;
 
   const winScore =
     winRate >= 0.22 ? 15 : winRate >= 0.18 ? 12 : winRate >= 0.14 ? 8 : winRate >= 0.1 ? 4 : 0;
@@ -195,7 +217,6 @@ function calculateScore(stats, recentGames) {
             ? "10% 이상"
             : "10% 미만";
   breakdown.set("승률", [winScore, 15, `${(winRate * 100).toFixed(1)}% · ${winRule}`]);
-  score += winScore;
 
   const top3Score =
     top3 >= 0.6 ? 15 : top3 >= 0.5 ? 12 : top3 >= 0.4 ? 8 : top3 >= 0.3 ? 4 : 0;
@@ -214,7 +235,6 @@ function calculateScore(stats, recentGames) {
     15,
     `TOP 3 ${(top3 * 100).toFixed(1)}% · ${top3Rule}`,
   ]);
-  score += top3Score;
 
   let focusScore = 3;
   if (totalGames >= 50) {
@@ -242,7 +262,6 @@ function calculateScore(stats, recentGames) {
               ? `${(mostUsedRatio * 100).toFixed(1)}% · 권장 집중 구간`
               : `${(mostUsedRatio * 100).toFixed(1)}% · 45~60% 구간`;
   breakdown.set("캐릭터 집중도", [focusScore, 10, focusDetail]);
-  score += focusScore;
 
   let averageRecentRank = null;
   let averageRecentDamage = null;
@@ -283,7 +302,6 @@ function calculateScore(stats, recentGames) {
     ? `평균 ${averageRecentRank.toFixed(2)}위 +${recentRankScore}/20 · 피해량 ${Math.round(averageRecentDamage).toLocaleString("ko-KR")} +${recentDamageScore}/20`
     : "현재 시즌 최근 랭크 기록 없음";
   breakdown.set("최근 폼", [formScore, 40, formDetail]);
-  score += formScore;
 
   let scoutingScore = 0;
   if (recentGames.length) {
@@ -300,7 +318,6 @@ function calculateScore(stats, recentGames) {
       ).toFixed(2)}회 · ${scoutingScore}점 구간`
     : "현재 시즌 최근 랭크 기록 없음";
   breakdown.set("시야·정찰 활동", [scoutingScore, 5, scoutingDetail]);
-  score += scoutingScore;
 
   let penalties = 0;
   const penaltyReasons = [];
@@ -350,12 +367,16 @@ function calculateScore(stats, recentGames) {
     }
   }
 
-  const baseScore = score;
+  const performanceDeduction = [...breakdown.values()].reduce(
+    (sum, [value, maximum]) => sum + (maximum - value),
+    0,
+  );
+  const baseScore = Math.max(0, 100 - performanceDeduction);
   const rawPenalties = penalties;
   penalties = Math.min(penalties, 25);
-  score = Math.max(0, score - penalties);
+  const score = Math.max(0, 100 - performanceDeduction - penalties);
   if (penalties) {
-    breakdown.set("위험 감점", [
+    breakdown.set("추가 감점", [
       -penalties,
       25,
       `${penaltyReasons.join(" · ")}${rawPenalties > 25 ? " · 최대 -25 적용" : ""}${baseScore < penalties ? " · 최종 점수 0점 하한 적용" : ""}`,
@@ -379,17 +400,17 @@ function calculateScore(stats, recentGames) {
     "캐릭터 집중도": "캐릭터 사용 성향이 점수에 반영됐습니다.",
     "최근 폼": "최근 경기력이 불안합니다.",
     "시야·정찰 활동": "최근 시야·정찰 활동이 부족합니다.",
-    "위험 감점": "닷지를 고려할 위험 지표가 감지됐습니다.",
+    "추가 감점": "추가 확인이 필요한 지표가 감점에 반영됐습니다.",
   };
   const scoreBreakdown = [...breakdown].map(([label, [value, maximum, detail]]) => ({
     label,
     score: value,
     maxScore: maximum,
-    isPenalty: label === "위험 감점",
+    isPenalty: label === "추가 감점",
     detail,
   }));
-  let comment = score >= 80 ? "전반적인 지표가 안정적입니다." : comments[weakest];
-  if (score < 80 && weakest === "캐릭터 집중도") {
+  let comment = score >= 35 ? "전반적인 지표가 안정적입니다." : comments[weakest];
+  if (score < 35 && weakest === "캐릭터 집중도") {
     if (totalGames < 50) {
       comment = "표본이 적어 캐릭터 성향을 판단하기 어렵습니다.";
     } else if (mostUsedRatio > 0.6) {
@@ -401,50 +422,418 @@ function calculateScore(stats, recentGames) {
   return [score, comment, scoreBreakdown];
 }
 
+const TIER_GROUPS = {
+  iron: "iron_bronze",
+  bronze: "iron_bronze",
+  silver: "silver_gold",
+  gold: "silver_gold",
+  platinum: "platinum",
+  platinum_plus: "platinum",
+  diamond_plus: "diamond_plus",
+  meteorite_plus: "meteorite_plus",
+  mithril_plus: "mithril_plus",
+  in1000: "mithril_plus",
+};
+const PERFORMANCE_THRESHOLDS = {
+  iron_bronze: [1, 0.98, 0.94, 0.88],
+  silver_gold: [1, 0.97, 0.92, 0.86],
+  platinum: [1, 0.95, 0.89, 0.83],
+  diamond_plus: [1, 0.93, 0.86, 0.8],
+  meteorite_plus: [1, 0.92, 0.84, 0.78],
+  mithril_plus: [1, 0.9, 0.82, 0.76],
+};
+const VISION_THRESHOLDS = {
+  iron_bronze: [1, 0.94, 0.86, 0.75],
+  silver_gold: [1, 0.98, 0.92, 0.84],
+  platinum: [1, 0.96, 0.9, 0.82],
+  diamond_plus: [1, 0.94, 0.87, 0.79],
+  meteorite_plus: [1, 0.92, 0.85, 0.77],
+  mithril_plus: [1, 0.9, 0.82, 0.74],
+};
+function tierAverage(tier, field) {
+  let weightedSum = 0;
+  let gameSum = 0;
+  for (const baseline of Object.values(tier.characters)) {
+    const games = Number(baseline.games);
+    const value = Number(baseline[field]);
+    if (Number.isFinite(games) && games > 0 && Number.isFinite(value)) {
+      weightedSum += games * value;
+      gameSum += games;
+    }
+  }
+  return gameSum ? weightedSum / gameSum : null;
+}
+
+function optionalNumber(value) {
+  if (value == null || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function recentFieldAverage(recentGames, field, { allowZero = false } = {}) {
+  const values = recentGames
+    .map((game) => optionalNumber(game[field]))
+    .filter((value) => value != null);
+  if (!values.length || (!allowZero && Math.max(...values) <= 0)) return null;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function deductionBand(value, thresholds, deductions, lowerIsBetter = false) {
+  if (!Number.isFinite(value)) return [0, "감점 제외"];
+  const labels = ["감점 없음", "약한 감점", "중간 감점", "큰 감점"];
+  for (let index = 0; index < thresholds.length; index += 1) {
+    const passed = lowerIsBetter
+      ? value <= thresholds[index]
+      : value >= thresholds[index];
+    if (passed) return [deductions[index], labels[index]];
+  }
+  return [deductions[4], "심한 감점"];
+}
+
+function placementDeduction(averageRank) {
+  if (!Number.isFinite(averageRank)) return [0, "감점 제외"];
+  if (averageRank <= 3.7) return [0, "감점 없음"];
+  if (averageRank <= 3.9) return [5, "약한 감점"];
+  if (averageRank <= 4.3) return [10, "중간 감점"];
+  if (averageRank < 4.7) return [15, "큰 감점"];
+  return [20, "심한 감점"];
+}
+
+function top3Deduction(top3, tierTop3) {
+  if (!Number.isFinite(top3)) return [0, "TOP3 결측 · 감점 제외"];
+  const [absoluteDeduction, absoluteBand] = deductionBand(
+    top3,
+    [0.45, 0.4, 0.35, 0.3],
+    [0, 5, 10, 17, 25],
+  );
+  if (!Number.isFinite(tierTop3)) {
+    return [
+      absoluteDeduction,
+      `내 TOP3 ${(top3 * 100).toFixed(1)}% · 절대 ${absoluteBand} · 티어 평균 결측`,
+    ];
+  }
+  const delta = top3 - tierTop3;
+  const [relativeDeduction, relativeBand] = deductionBand(
+    delta,
+    [-0.03, -0.06, -0.1, -0.15],
+    [0, 5, 10, 17, 25],
+  );
+  const deduction = Math.max(absoluteDeduction, relativeDeduction);
+  const source =
+    absoluteDeduction >= relativeDeduction ? "절대 기준" : "티어 대비";
+  return [
+    deduction,
+    `내 TOP3 ${(top3 * 100).toFixed(1)}% · 티어 평균 ${(tierTop3 * 100).toFixed(1)}% ` +
+      `· ${delta >= 0 ? "+" : ""}${(delta * 100).toFixed(1)}%p · 절대 ${absoluteBand} / ` +
+      `티어 대비 ${relativeBand} · ${source} -${deduction}`,
+  ];
+}
+
+function characterPerformanceDeduction(
+  recentGames,
+  seasonCharacterStats,
+  tier,
+  group,
+  characterMetadata,
+) {
+  if (!recentGames.length) {
+    return [0, "최근 캐릭터 표본 없음 · 감점 제외", false];
+  }
+  const grouped = new Map();
+  for (const game of recentGames) {
+    const characterId = Number(game.characterNum);
+    if (!Number.isInteger(characterId)) continue;
+    const games = grouped.get(characterId) || [];
+    games.push(game);
+    grouped.set(characterId, games);
+  }
+  const seasonGamesByCharacter = new Map(
+    seasonCharacterStats
+      .map((character) => [
+        Number(character.characterCode),
+        Number(character.totalGames),
+      ])
+      .filter(
+        ([characterId, games]) =>
+          Number.isInteger(characterId) &&
+          Number.isFinite(games),
+      ),
+  );
+
+  let weightedDeduction = 0;
+  let eligibleGames = 0;
+  const evaluated = [];
+  const entries = [...grouped.entries()].sort(
+    (a, b) => b[1].length - a[1].length,
+  );
+  for (const [characterId, games] of entries) {
+    if (
+      games.length < 3 ||
+      (seasonGamesByCharacter.get(characterId) || 0) < 10
+    ) {
+      continue;
+    }
+    const baseline = tier.characters[String(characterId)];
+    if (!baseline) continue;
+    const actualDamage = recentFieldAverage(games, "damageToPlayer");
+    const expectedDamage = Number(baseline.averageDamage);
+    if (
+      !Number.isFinite(actualDamage) ||
+      !Number.isFinite(expectedDamage) ||
+      expectedDamage <= 0
+    ) {
+      continue;
+    }
+    const damageRatio = actualDamage / expectedDamage;
+    const actualTeamKills = recentFieldAverage(games, "teamKill", {
+      allowZero: true,
+    });
+    const expectedTeamKills = Number(baseline.averageTeamKills);
+    const performanceRatio =
+      Number.isFinite(actualTeamKills) &&
+      Number.isFinite(expectedTeamKills) &&
+      expectedTeamKills > 0
+        ? damageRatio * 0.7 + (actualTeamKills / expectedTeamKills) * 0.3
+        : damageRatio;
+    const [rawDeduction, band] = deductionBand(
+      performanceRatio,
+      PERFORMANCE_THRESHOLDS[group],
+      [0, 5, 10, 17, 23],
+    );
+    const weight = games.length / recentGames.length;
+    weightedDeduction += rawDeduction * weight;
+    eligibleGames += games.length;
+    const characterName =
+      characterMetadata?.[String(characterId)]?.name || `#${characterId}`;
+    evaluated.push(
+      `${characterName} ${games.length}판 ${(performanceRatio * 100).toFixed(1)}% ` +
+        `(${band}, -${rawDeduction}×${(weight * 100).toFixed(0)}%)`,
+    );
+  }
+  if (!evaluated.length) {
+    return [
+      0,
+      "시즌 10판 이상·최근 랭크 3판 이상 캐릭터 표본 없음 · 감점 제외",
+      false,
+    ];
+  }
+  const deduction = Math.min(23, Math.round(weightedDeduction * 10) / 10);
+  const coverage = eligibleGames / recentGames.length;
+  return [
+    deduction,
+    `유효 ${eligibleGames}/${recentGames.length}판 (${(coverage * 100).toFixed(1)}%) ` +
+      `· 판수 가중 -${deduction} · ${evaluated.join(" / ")}`,
+    true,
+  ];
+}
+
+export function calculateScore(stats, recentGames, dakggStats) {
+  validateStats(stats);
+  const totalGames = Number(stats.totalGames);
+  const tierKey = tierForMmr(stats.mmr, stats.rank);
+  const tier = dakggStats?.tiers?.[tierKey];
+  if (!tier) {
+    return [100, "비교 데이터가 없어 닷지 판정을 보류합니다.", [], true];
+  }
+  const group = TIER_GROUPS[tierKey];
+  const breakdown = [];
+
+  let [deduction, performanceDetail, performanceEvaluated] =
+    characterPerformanceDeduction(
+    recentGames,
+    stats.characterStats,
+    tier,
+    group,
+    dakggStats.characters,
+  );
+  breakdown.push([
+    "캐릭터 성과",
+    25,
+    deduction,
+    performanceDetail,
+  ]);
+
+  const totalWins = optionalNumber(stats.totalWins);
+  const winRate = totalWins == null ? null : totalWins / totalGames;
+  const winEvaluated = Number.isFinite(winRate);
+  let band;
+  [deduction, band] = deductionBand(
+    winRate,
+    [0.15, 0.12, 0.10, 0.08],
+    [0, 4, 9, 15, 20],
+  );
+  breakdown.push([
+    "승률",
+    20,
+    deduction,
+    Number.isFinite(winRate)
+      ? `내 시즌 승률 ${(winRate * 100).toFixed(1)}% · 절대 기준 · ${band}`
+      : "승률 결측 · 감점 제외",
+  ]);
+
+  const tierTop3 = tierAverage(tier, "top3Rate");
+  const top3 = optionalNumber(stats.top3);
+  const top3Evaluated = Number.isFinite(top3);
+  let top3Detail;
+  [deduction, top3Detail] = top3Deduction(top3, tierTop3);
+  breakdown.push([
+    "TOP3",
+    25,
+    deduction,
+    top3Detail,
+  ]);
+
+  const tierVision = tierAverage(tier, "averageViewContribution");
+  const actualVision = recentFieldAverage(recentGames, "viewContribution");
+  const visionRatio =
+    Number.isFinite(actualVision) && Number.isFinite(tierVision) && tierVision > 0
+      ? actualVision / tierVision
+      : null;
+  const visionEvaluated = Number.isFinite(visionRatio);
+  [deduction, band] = deductionBand(
+    visionRatio,
+    VISION_THRESHOLDS[group],
+    [0, 2, 4, 7, 10],
+  );
+  breakdown.push([
+    "시야점수",
+    10,
+    deduction,
+    Number.isFinite(visionRatio)
+      ? `내 시야 ${actualVision.toFixed(2)} · 티어 평균 ${tierVision.toFixed(2)} · ${(visionRatio * 100).toFixed(1)}% · ${band}`
+      : "시야점수 결측 또는 0점 오류 의심 · 감점 제외",
+  ]);
+
+  const parsedAverageRank = optionalNumber(stats.averageRank);
+  const averageRank =
+    parsedAverageRank != null && parsedAverageRank > 0
+      ? parsedAverageRank
+      : null;
+  const placementEvaluated = Number.isFinite(averageRank);
+  [deduction, band] = placementDeduction(averageRank);
+  breakdown.push([
+    "평균순위",
+    20,
+    deduction,
+    Number.isFinite(averageRank)
+      ? `시즌 평균 ${averageRank.toFixed(2)}위 · ${band}`
+      : "평균순위 결측 · 감점 제외",
+  ]);
+
+  const totalDeduction = breakdown.reduce((sum, item) => sum + item[2], 0);
+  const score = Math.round(Math.max(0, 100 - totalDeduction) * 10) / 10;
+  const evaluatedCount = [
+    performanceEvaluated,
+    winEvaluated,
+    top3Evaluated,
+    visionEvaluated,
+    placementEvaluated,
+  ].filter(Boolean).length;
+  const protectedVerdict = totalGames < 20 || evaluatedCount < 4;
+  let comment;
+  if (totalGames < 20) {
+    comment = "전체 랭크 20판 미만으로 닷지 판정에서 제외합니다.";
+  } else if (evaluatedCount < 4) {
+    comment = "비교 가능한 데이터가 부족해 닷지 판정에서 제외합니다.";
+  } else if (score < 55) {
+    const weakest = [...breakdown].sort((a, b) => b[2] - a[2])[0];
+    comment = `${weakest[0]} 지표의 감점이 가장 큽니다.`;
+  } else {
+    comment = "동일 티어 평균과 비교해 전반적으로 무난한 지표입니다.";
+  }
+  return [
+    score,
+    comment,
+    breakdown.map(([label, maximum, itemDeduction, detail]) => ({
+      label,
+      score: Math.round((maximum - itemDeduction) * 10) / 10,
+      maxScore: maximum,
+      deduction: itemDeduction,
+      isPenalty: false,
+      detail,
+    })),
+    protectedVerdict,
+  ];
+}
+
 function generateWarnings(stats, recentGames) {
   validateStats(stats);
   const warnings = [];
   const totalGames = Number(stats.totalGames);
-  const winRate = Number(stats.totalWins) / totalGames;
-  const top3 = Number(stats.top3) || 0;
-  const top5 = Number(stats.top5) || 0;
-  const top7 = Number(stats.top7) || 0;
+  const totalWins = optionalNumber(stats.totalWins);
+  const winRate = totalWins == null ? null : totalWins / totalGames;
+  const top3 = optionalNumber(stats.top3);
+  const top5 = optionalNumber(stats.top5);
+  const top7 = optionalNumber(stats.top7);
 
-  if (totalGames >= 50 && winRate < 0.08) warnings.push("낮은 승률");
-  if (totalGames >= 50 && top7 - top5 >= 0.25 && top3 <= 0.3) {
+  if (totalGames >= 50 && winRate != null && winRate < 0.08) {
+    warnings.push("낮은 승률");
+  }
+  if (
+    totalGames >= 50 &&
+    top3 != null &&
+    top5 != null &&
+    top7 != null &&
+    top7 - top5 >= 0.25 &&
+    top3 <= 0.3
+  ) {
     warnings.push("중반 탈락 빈번");
   }
   if (recentGames.length) {
     const averageRank =
       recentGames.reduce((sum, game) => sum + (Number(game.gameRank) || 9), 0) /
       recentGames.length;
-    const averageDamage =
-      recentGames.reduce((sum, game) => sum + (Number(game.damageToPlayer) || 0), 0) /
-      recentGames.length;
-    if (averageRank > 6) warnings.push("최근 평균 순위 위험");
-    if (averageDamage < 7000) warnings.push("최근 피해량 부족");
-    if (averageRank > 6 && averageDamage < 7000) warnings.push("최근 경기력 급락");
+    const averageDamage = recentFieldAverage(recentGames, "damageToPlayer");
+    if (averageRank > 6) warnings.push("최근 평균 순위 저조");
+    if (Number.isFinite(averageDamage) && averageDamage < 7000) {
+      warnings.push("최근 피해량 부족");
+    }
+    if (
+      averageRank > 6 &&
+      Number.isFinite(averageDamage) &&
+      averageDamage < 7000
+    ) {
+      warnings.push("최근 경기력 급락");
+    }
   }
 
   const mostUsed = Math.max(
     ...stats.characterStats.map((character) => Number(character.totalGames) || 0),
   );
-  if (totalGames < 50) warnings.push("캐릭터 성향 데이터 부족");
+  if (totalGames < 20) warnings.push("20판 미만 · 닷지 판정 제외");
   else if (mostUsed < 10) warnings.push("뚜렷한 주력 캐릭터 없음");
   return warnings;
 }
 
 function grade(score) {
-  if (score >= 85) return "최고";
-  if (score >= 70) return "좋음";
-  if (score >= 50) return "보통";
-  if (score >= 35) return "주의";
-  return "닷지 권장";
+  if (score >= 55) return "좋음";
+  return "닷지 추천";
 }
 
 function round(value, digits = 0) {
   const scale = 10 ** digits;
   return Math.round((value + Number.EPSILON) * scale) / scale;
+}
+
+export function buildNoRecentRankResult(nickname, baseMetrics) {
+  return {
+    nickname,
+    score: null,
+    grade: "분석 보류",
+    analysisStatus: "no_recent_rank",
+    dodgeProtected: true,
+    comment: "최근 20게임 안에 랭크게임이 확인되지 않습니다.",
+    warnings: ["최근에는 일반게임을 이용한 것으로 보입니다."],
+    scoreBreakdown: [],
+    comparison: null,
+    metrics: {
+      ...baseMetrics,
+      recentGames: 0,
+      recentAverageRank: null,
+      recentAverageDamage: null,
+      recentAverageScouting: null,
+    },
+  };
 }
 
 export function cleanNickname(value) {
@@ -461,36 +850,74 @@ export async function evaluatePlayer(nickname) {
   const season = getRankSeasonFromGames(games) ?? await getCurrentSeasonId();
   const stats = await getSeasonStats(uid, season);
   const recent = recentRankGames(games, season);
-  const [score, comment, scoreBreakdown] = calculateScore(stats, recent);
   const totalGames = Number(stats.totalGames);
+  const totalWins = optionalNumber(stats.totalWins);
+  const averageRank = optionalNumber(stats.averageRank);
+  const top3 = optionalNumber(stats.top3);
   const mostUsedGames = Math.max(
     ...stats.characterStats.map((character) => Number(character.totalGames) || 0),
   );
+  const baseMetrics = {
+    seasonId: season,
+    seasonLabel: formatIngameSeason(season),
+    totalGames,
+    winRate: totalWins == null
+      ? null
+      : round((totalWins / totalGames) * 100, 1),
+    averageRank: averageRank != null && averageRank > 0
+      ? round(averageRank, 2)
+      : null,
+    top3Rate: top3 == null ? null : round(top3 * 100, 1),
+    mainCharacterRate: round((mostUsedGames / totalGames) * 100, 1),
+    fetchedGames: games.length,
+  };
+
+  if (!recent.length) {
+    return buildNoRecentRankResult(nickname, baseMetrics);
+  }
+
+  const dakggStats = await getDakggStats();
+  const [score, comment, scoreBreakdown, dodgeProtected] = calculateScore(
+    stats,
+    recent,
+    dakggStats,
+  );
+  let comparison = null;
+  try {
+    comparison = compareMostCharacters(
+      stats,
+      recent,
+      dakggStats,
+    );
+  } catch (error) {
+    console.warn("DAK.GG comparison is unavailable:", error.message);
+  }
 
   return {
     nickname,
     score,
-    grade: grade(score),
+    grade: dodgeProtected ? "NOT DODGE" : grade(score),
+    analysisStatus: "scored",
+    dodgeProtected,
     comment,
     warnings: generateWarnings(stats, recent),
     scoreBreakdown,
+    comparison,
     metrics: {
-      seasonId: season,
-      seasonLabel: formatIngameSeason(season),
-      totalGames,
-      winRate: round((Number(stats.totalWins) / totalGames) * 100, 1),
-      averageRank: round(Number(stats.averageRank), 2),
-      top3Rate: round((Number(stats.top3) || 0) * 100, 1),
-      mainCharacterRate: round((mostUsedGames / totalGames) * 100, 1),
+      ...baseMetrics,
       recentGames: recent.length,
       recentAverageRank: recent.length
         ? round(recent.reduce((sum, game) => sum + (Number(game.gameRank) || 9), 0) / recent.length, 2)
         : null,
       recentAverageDamage: recent.length
-        ? round(recent.reduce((sum, game) => sum + (Number(game.damageToPlayer) || 0), 0) / recent.length)
+        ? Number.isFinite(recentFieldAverage(recent, "damageToPlayer"))
+          ? round(recentFieldAverage(recent, "damageToPlayer"))
+          : null
         : null,
-      recentAverageScouting: recent.length
-        ? round(recent.reduce((sum, game) => sum + scoutingActivity(game), 0) / recent.length, 2)
+      recentAverageScouting: Number.isFinite(
+        recentFieldAverage(recent, "viewContribution"),
+      )
+        ? round(recentFieldAverage(recent, "viewContribution"), 2)
         : null,
     },
   };
