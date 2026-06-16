@@ -730,16 +730,39 @@ export function calculateScore(stats, recentGames, dakggStats) {
     placementEvaluated,
   ].filter(Boolean).length;
   const protectedVerdict = totalGames < 20 || evaluatedCount < 4;
+  const labels = breakdown.map((item) => item[0]);
+  const reasonMessages = {
+    [labels[0]]: "주력 캐릭터 성과가 같은 티어 평균보다 낮습니다.",
+    [labels[1]]: "시즌 승률이 기준 승률보다 낮습니다.",
+    [labels[2]]: "TOP3 비율이 같은 티어 평균 또는 안정권 기준보다 낮습니다.",
+    [labels[3]]: "최근 시야점수가 같은 티어 평균보다 낮습니다.",
+    [labels[4]]: "시즌 평균순위가 안정권 기준보다 낮습니다.",
+  };
+  const positiveMessages = {
+    [labels[0]]: "주력 캐릭터 성과가 같은 티어 평균보다 좋습니다.",
+    [labels[1]]: "시즌 승률이 기준 승률보다 좋습니다.",
+    [labels[2]]: "TOP3 비율이 같은 티어 평균 또는 안정권 기준보다 좋습니다.",
+    [labels[3]]: "최근 시야점수가 같은 티어 평균보다 좋습니다.",
+    [labels[4]]: "시즌 평균순위가 안정권 기준보다 좋습니다.",
+  };
   let comment;
   if (totalGames < 20) {
-    comment = "전체 랭크 20판 미만으로 닷지 판정에서 제외합니다.";
+    comment = "전체 랭크 20판 미만으로 주의 판정에서 제외합니다.";
   } else if (evaluatedCount < 4) {
-    comment = "비교 가능한 데이터가 부족해 닷지 판정에서 제외합니다.";
+    comment = "비교 가능한 데이터가 부족해 주의 판정에서 제외합니다.";
   } else if (score < 55) {
     const weakest = [...breakdown].sort((a, b) => b[2] - a[2])[0];
-    comment = `${weakest[0]} 지표의 감점이 가장 큽니다.`;
+    comment = reasonMessages[weakest[0]] || "확인이 필요한 지표가 기준보다 낮습니다.";
+  } else if (score >= 95) {
+    comment = "정말 좋은 팀원입니다!";
   } else {
-    comment = "동일 티어 평균과 비교해 전반적으로 무난한 지표입니다.";
+    const best = [...breakdown].sort((a, b) => {
+      const aRatio = a[1] ? (a[1] - a[2]) / a[1] : -1;
+      const bRatio = b[1] ? (b[1] - b[2]) / b[1] : -1;
+      if (bRatio !== aRatio) return bRatio - aRatio;
+      return b[1] - b[2] - (a[1] - a[2]);
+    })[0];
+    comment = positiveMessages[best[0]] || "안정적인 지표가 확인됩니다.";
   }
   return [
     score,
@@ -807,7 +830,7 @@ function generateWarnings(stats, recentGames) {
 
 function grade(score) {
   if (score >= 55) return "좋음";
-  return "닷지 추천";
+  return "주의";
 }
 
 function round(value, digits = 0) {

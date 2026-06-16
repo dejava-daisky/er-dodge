@@ -346,3 +346,52 @@ test("uses the harsher TOP3 deduction between absolute and tier-relative rules",
     );
   }
 });
+
+
+test("comments on the strongest good metric for stable scores", async () => {
+  const recent = Array.from({ length: 20 }, () => ({
+    characterNum: 72,
+    damageToPlayer: 22000,
+    teamKill: 12,
+    viewContribution: 35,
+  }));
+  const [score, comment] = calculateScore(
+    stats({ totalGames: 1000, totalWins: 150, top3: 0.4, averageRank: 3.9 }),
+    recent,
+    await artifact(),
+  );
+  assert.ok(score >= 55 && score < 95);
+  assert.match(comment, /\uC88B\uC2B5\uB2C8\uB2E4/);
+});
+
+test("uses a clear praise comment for near perfect scores", async () => {
+  const recent = Array.from({ length: 20 }, () => ({
+    characterNum: 72,
+    damageToPlayer: 26000,
+    teamKill: 14,
+    viewContribution: 40,
+  }));
+  const [score, comment] = calculateScore(
+    stats({ totalGames: 1000, totalWins: 180, top3: 0.5, averageRank: 3.6 }),
+    recent,
+    await artifact(),
+  );
+  assert.ok(score >= 95);
+  assert.equal(comment, "\uC815\uB9D0 \uC88B\uC740 \uD300\uC6D0\uC785\uB2C8\uB2E4!");
+});
+
+test("comments on the weakest bad metric for caution scores", async () => {
+  const recent = Array.from({ length: 20 }, () => ({
+    characterNum: 72,
+    damageToPlayer: 1,
+    teamKill: 1,
+    viewContribution: 1,
+  }));
+  const [score, comment] = calculateScore(
+    stats({ totalGames: 1000, totalWins: 0, top3: 0, averageRank: 7 }),
+    recent,
+    await artifact(),
+  );
+  assert.ok(score < 55);
+  assert.match(comment, /\uB0AE\uC2B5\uB2C8\uB2E4/);
+});

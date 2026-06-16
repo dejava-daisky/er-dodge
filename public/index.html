@@ -1243,8 +1243,8 @@
                 <section id="results" class="results" aria-live="polite"></section>
             </div>
             <p class="service-disclaimer">
-                <strong>안내:</strong> 닷지 추천은 공개 전적을 바탕으로 제공하는 사이트의 참고 기능입니다.
-                실제 닷지를 종용하거나 강제하지 않으며, 최종 판단과 선택은 이용자에게 있습니다.
+                <strong>안내:</strong> 주의 신호는 공개 전적을 바탕으로 제공하는 참고 기능입니다.
+                특정 행동을 종용하거나 강제하지 않으며, 최종 판단과 선택은 이용자에게 있습니다.
             </p>
         </section>
 
@@ -1272,7 +1272,7 @@
                     </div>
                     <div class="legend-row">
                         <span class="legend-label">
-                            <i class="legend-light" style="--light: var(--red)"></i>닷지 추천
+                            <i class="legend-light" style="--light: var(--red)"></i>주의
                         </span>
                         <span>0-54</span>
                     </div>
@@ -1536,7 +1536,7 @@
         </section>
         <p class="score-note">
             현재 계산은 100점에서 다섯 영역의 감점을 차감하는 방식입니다.
-            최종 판정 기준은 좋음 55점 이상, 닷지 추천 55점 미만입니다.
+            최종 판정 기준은 좋음 55점 이상, 주의 55점 미만입니다.
             NaN·결측·0점 오류 의심 항목은 감점하지 않으며, 전체 랭크 20판 미만 또는 비교 데이터 부족은 NOT DODGE입니다.
         </p>
         </div>
@@ -1584,7 +1584,7 @@
     function signalFor(score, protectedVerdict = false) {
         if (protectedVerdict) return {color: "#55e39b", key: "proceed", label: "NOT DODGE"};
         if (score >= 55) return {color: "#55e39b", key: "proceed", label: "좋음"};
-        return {color: "#ff5d6c", key: "dodge", label: "닷지 추천"};
+        return {color: "#ff5d6c", key: "dodge", label: "주의"};
     }
 
     function trafficSignalMarkup(signal) {
@@ -2026,14 +2026,15 @@
                         </div>
                     </div>
                     <p class="receipt-verdict">
-                        ${escapeHtml(player.grade)} · ${escapeHtml(player.comment)}
+                        ${escapeHtml(player.grade)}${player.comment ? ` · ${escapeHtml(player.comment)}` : ""}
                     </p>
                 </section>
                 <aside class="sample-notice" aria-label="표본 보호 안내">
                     <strong>표본 보호 안내</strong>
                     <p>
-                        최근 최대 20경기를 분석 기준으로 확인하며,
-                        <b>${metrics.recentGames}/${metrics.fetchedGames}경기의 현재 시즌 랭크 표본</b>으로 최근 지표를 분석했습니다.
+                        최근 20경기 중,
+                        <b>랭크게임으로 판독된 ${metrics.recentGames}/${metrics.fetchedGames}경기의 표본</b>으로만 분석했습니다.
+                        이는 최근 폼에 따라 점수가 바뀔 수 있다는 뜻입니다.
                         최근 랭크 표본이 적으면 피해량과 시야 지표의 변동성이 커질 수 있으며,
                         캐릭터 성과는 시즌 전체 10판 이상 사용했고 최근 랭크에서 3판 이상 확인된 캐릭터를 개별 평가합니다.
                         결측값이나 0점 오류가 의심되는 항목은 감점하지 않으며,
