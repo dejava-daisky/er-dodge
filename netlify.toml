@@ -17,6 +17,16 @@
   status = 200
 
 [[redirects]]
+  from = "/analyze/feedback"
+  to = "/.netlify/functions/analyze-feedback"
+  status = 200
+
+[[redirects]]
+  from = "/api/ocr"
+  to = "/.netlify/functions/ocr"
+  status = 200
+
+[[redirects]]
   from = "/api/patches/characters"
   to = "/.netlify/functions/patch-characters"
   status = 200

@@ -3,21 +3,24 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ER Dodge Check</title>
+    <title>니아의 닷지 판독기</title>
+    <link rel="icon" href="/static/favicon.ico" sizes="any">
     <style>
         :root {
             color-scheme: dark;
-            --bg: #090a0d;
-            --surface: #111319;
-            --surface-2: #171a21;
-            --line: #292d36;
-            --line-bright: #3b414d;
-            --text: #f1f3f6;
-            --muted: #858b96;
-            --green: #55e39b;
-            --yellow: #ffc45c;
-            --red: #ff5d6c;
-            --white: #f7f8fa;
+            --bg: #0d0b12;
+            --surface: #171221;
+            --surface-2: #21172f;
+            --line: #322640;
+            --line-bright: #69517d;
+            --text: #e8e3f0;
+            --muted: #9c93aa;
+            --green: #8b5cf6;
+            --yellow: #f45ea2;
+            --red: #ff5d7d;
+            --white: #f8f3ff;
+            --purple: #8b5cf6;
+            --pink: #f45ea2;
         }
 
         * { box-sizing: border-box; }
@@ -28,10 +31,13 @@
             color: var(--text);
             font-family: Inter, Pretendard, "Noto Sans KR", system-ui, sans-serif;
             background:
-                linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+                radial-gradient(circle at 50% -12%, rgba(139, 92, 246, 0.16), transparent 34%),
+                linear-gradient(180deg, #100d17 0%, #09070d 58%, #07060a 100%),
                 var(--bg);
-            background-size: 32px 32px;
+        }
+
+        body::before {
+            display: none;
         }
 
         button, input { font: inherit; }
@@ -64,12 +70,17 @@
             height: 36px;
             place-items: center;
             border: 1px solid var(--line-bright);
-            color: var(--green);
-            font-size: 12px;
-            font-weight: 900;
-            letter-spacing: -0.04em;
-            background: var(--surface-2);
+            background: linear-gradient(135deg, #21172f, #120f1c);
+            box-shadow: 0 0 24px rgba(139, 92, 246, 0.18);
             transform: skew(-7deg);
+            overflow: hidden;
+        }
+
+        .brand-mark img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: skew(7deg) scale(1.18);
         }
 
         .brand-copy strong {
@@ -112,8 +123,8 @@
         }
 
         .view-tab.active {
-            color: #08130d;
-            background: var(--green);
+            color: #12091d;
+            background: var(--purple);
         }
 
         .dialog-close:hover { color: var(--white); }
@@ -128,7 +139,8 @@
         .main-panel,
         .team-panel {
             border: 1px solid var(--line);
-            background: rgba(17, 19, 25, 0.96);
+            background: rgba(23, 18, 33, 0.96);
+            box-shadow: 0 0 36px rgba(139, 92, 246, 0.08);
         }
 
         .panel-header {
@@ -187,18 +199,18 @@
 
         input:hover { border-color: var(--line-bright); }
         input:focus {
-            border-color: var(--green);
-            background: #10141a;
+            border-color: var(--purple);
+            background: #161120;
         }
 
         .submit-button {
             position: relative;
             border: 0;
-            color: #07130d;
+            color: #15091f;
             font-size: 13px;
             font-weight: 900;
             cursor: pointer;
-            background: var(--green);
+            background: linear-gradient(135deg, var(--purple), var(--pink));
             transition: filter 140ms, transform 140ms;
         }
 
@@ -261,6 +273,75 @@
         }
 
         .service-disclaimer strong { color: #c9ced6; }
+
+        .site-footer {
+            margin: 22px 0 0;
+            text-align: center;
+        }
+
+        .site-footer span {
+            display: inline;
+        }
+
+        .footer-link {
+            border: 0;
+            padding: 0;
+            color: #d8cef0;
+            font: inherit;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        .footer-link:hover { color: var(--white); }
+
+        .ocr-panel {
+            display: grid;
+            gap: 10px;
+            margin: 0 18px 18px;
+            padding: 14px;
+            border: 1px solid rgba(85, 227, 155, 0.18);
+            background: rgba(85, 227, 155, 0.045);
+        }
+
+        .ocr-panel strong {
+            color: #dce6de;
+            font-size: 12px;
+        }
+
+        .ocr-paste-zone {
+            min-height: 78px;
+            display: grid;
+            place-items: center;
+            padding: 14px;
+            border: 1px dashed rgba(85, 227, 155, 0.38);
+            color: #b8c5bd;
+            background: rgba(14, 16, 21, 0.72);
+            text-align: center;
+            cursor: text;
+            outline: none;
+        }
+
+        .ocr-paste-zone:focus {
+            border-color: rgba(85, 227, 155, 0.72);
+            box-shadow: 0 0 0 2px rgba(85, 227, 155, 0.08);
+        }
+
+        .ocr-paste-zone span {
+            display: block;
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .ocr-message {
+            min-height: 18px;
+            margin: 0;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.55;
+        }
 
         .empty-state {
             display: grid;
@@ -809,6 +890,86 @@
             color: var(--white);
         }
 
+        .coach-analysis {
+            width: min(920px, 100%);
+            margin: 22px auto;
+            padding: 22px;
+            border: 1px solid rgba(85, 227, 155, 0.24);
+            background: linear-gradient(135deg, rgba(85, 227, 155, 0.09), rgba(255, 255, 255, 0.03));
+            color: var(--text);
+        }
+
+        .coach-analysis h3,
+        .coach-analysis h4 {
+            margin: 0;
+            color: var(--white);
+        }
+
+        .coach-analysis h3 {
+            font-size: 18px;
+            letter-spacing: -0.02em;
+        }
+
+        .coach-status {
+            display: inline-flex;
+            margin-bottom: 10px;
+            padding: 5px 9px;
+            border: 1px solid rgba(85, 227, 155, 0.28);
+            color: #8df0bc;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .coach-summary {
+            margin: 12px 0 0;
+            color: #d8d3c9;
+            line-height: 1.7;
+        }
+
+        .coach-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .coach-box {
+            padding: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.18);
+        }
+
+        .coach-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #f4efe7;
+            font-size: 13px;
+        }
+
+        .coach-box p,
+        .coach-box li {
+            margin: 0;
+            color: #c9c3b7;
+            font-size: 12px;
+            line-height: 1.65;
+        }
+
+        .coach-box ul {
+            display: grid;
+            gap: 8px;
+            margin: 0;
+            padding-left: 16px;
+        }
+
+        .coach-next {
+            margin-top: 16px;
+            padding: 16px;
+            border-left: 4px solid #55e39b;
+            background: rgba(85, 227, 155, 0.08);
+        }
+
         .receipt-image-wrap {
             width: min(560px, 100%);
             margin: 24px auto 4px;
@@ -830,6 +991,77 @@
             margin-top: 13px;
             color: var(--muted);
             font-size: 11px;
+        }
+
+        .healthy-feedback {
+            width: min(920px, 100%);
+            margin: 20px auto 4px;
+            text-align: center;
+        }
+
+        .healthy-feedback-button {
+            min-width: 180px;
+            border-color: rgba(85, 227, 155, 0.45);
+            color: #101812;
+            background: #55e39b;
+            box-shadow: 0 0 28px rgba(85, 227, 155, 0.18);
+        }
+
+        .healthy-feedback-panel {
+            margin-top: 18px;
+            border: 1px solid rgba(85, 227, 155, 0.28);
+            background: #101719;
+            text-align: left;
+            overflow: hidden;
+        }
+
+        .healthy-feedback-panel[hidden] {
+            display: none;
+        }
+
+        .healthy-feedback-image {
+            display: block;
+            width: 100%;
+            max-height: 520px;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .healthy-feedback-body {
+            padding: 22px;
+        }
+
+        .healthy-feedback-body h3 {
+            margin: 0 0 14px;
+            color: var(--white);
+            font-size: clamp(22px, 4vw, 34px);
+            letter-spacing: -0.04em;
+        }
+
+        .healthy-feedback-body h4 {
+            margin: 18px 0 8px;
+            color: #8df0bc;
+            font-size: 13px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .healthy-feedback-body p,
+        .healthy-feedback-body li {
+            color: #d6d0c5;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .healthy-feedback-body ol {
+            display: grid;
+            gap: 10px;
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .healthy-feedback-error {
+            color: #ff8fa0;
         }
 
         .patch-view,
@@ -1188,18 +1420,19 @@
 <main class="shell">
     <header class="topbar">
         <div class="brand">
-            <div class="brand-mark">ER</div>
+            <div class="brand-mark" aria-label="니아">
+                <img src="/static/favicon.ico" alt="">
+            </div>
             <div class="brand-copy">
-                <strong>DODGE CHECK</strong>
-                <span>Ranked teammate analyzer</span>
+                <strong>니아의 게임월드</strong>
+                <span>RANKED DODGE CHECKER</span>
             </div>
         </div>
         <div class="top-actions">
-            <nav class="view-tabs" aria-label="분석 모드">
-                <button class="view-tab active" type="button" data-view="team">팀원 분석</button>
-                <button class="view-tab" type="button" data-view="my">1인 상세 분석</button>
-                <button class="view-tab" type="button" data-view="patch">패치 내역</button>
-                <button class="view-tab" type="button" data-view="score">채점표</button>
+            <nav class="view-tabs" aria-label="닷지 판독 메뉴">
+                <button class="view-tab active" type="button" data-view="team">닷지 판독</button>
+                <button class="view-tab" type="button" data-view="my">내 전적</button>
+                <button class="view-tab" type="button" data-view="patch">패치 기록</button>
             </nav>
         </div>
     </header>
@@ -1207,50 +1440,57 @@
     <div id="team-view" class="workspace">
         <section class="main-panel">
             <div class="panel-header">
-                <h1 class="panel-title">TEAMMATE SCAN</h1>
-                <span class="step">01 / INPUT</span>
+                <h1 class="panel-title">DODGE CHECK</h1>
+                <span class="step">01 / PLAYER SELECT</span>
             </div>
 
             <form id="analyze-form" class="search-form" novalidate>
                 <div class="fields">
                     <div class="field">
-                        <label for="nickname-1">TEAMMATE 01</label>
+                        <label for="nickname-1">PLAYER 01</label>
                         <input id="nickname-1" maxlength="30" autocomplete="off"
-                               placeholder="첫 번째 닉네임">
+                               placeholder="첫 번째 플레이어 닉네임">
                     </div>
                     <div class="field">
-                        <label for="nickname-2">TEAMMATE 02 / OPTIONAL</label>
+                        <label for="nickname-2">PLAYER 02 / OPTIONAL</label>
                         <input id="nickname-2" maxlength="30" autocomplete="off"
-                               placeholder="두 번째 닉네임 (선택)">
+                               placeholder="두 번째 플레이어 닉네임">
                     </div>
-                    <button id="submit-button" class="submit-button" type="submit">SCAN</button>
+                    <button id="submit-button" class="submit-button" type="submit">DODGE CHECK</button>
                 </div>
                 <p id="form-error" class="form-error" role="alert"></p>
             </form>
 
+            <section class="ocr-panel" aria-label="닉네임 캡처 인식">
+                <strong>닉네임 캡처 인식</strong>
+                <div id="ocr-paste-zone" class="ocr-paste-zone" tabindex="0">
+                    <div>
+                        닉네임 부분을 캡처해서 Ctrl+V
+                        <span>읽은 닉네임은 빈 플레이어 칸에 넣을게.</span>
+                    </div>
+                </div>
+                <p id="ocr-message" class="ocr-message">파일로 저장할 필요는 없어. 캡처한 이미지를 바로 붙여넣어.</p>
+            </section>
+
             <div id="loading" class="status-line" role="status">
                 <span class="status-dot"></span>
-                RANK DATA ANALYSIS IN PROGRESS
+                LOADING PLAYER DATA...
             </div>
 
             <div id="result-area" class="result-area">
                 <div id="empty-state" class="empty-state">
                     <div>
-                        <strong>WAITING FOR TEAMMATE DATA</strong>
-                        <span>팀원 닉네임을 한 명 이상 입력하면 판정을 시작합니다.</span>
+                        <strong>NO PLAYER SELECTED</strong>
+                        <span>닉네임을 입력해. 최근 랭크 기록부터 확인할게.</span>
                     </div>
                 </div>
                 <section id="results" class="results" aria-live="polite"></section>
             </div>
-            <p class="service-disclaimer">
-                <strong>안내:</strong> 주의 신호는 공개 전적을 바탕으로 제공하는 참고 기능입니다.
-                특정 행동을 종용하거나 강제하지 않으며, 최종 판단과 선택은 이용자에게 있습니다.
-            </p>
         </section>
 
         <aside class="team-panel">
             <div class="panel-header">
-                <h2 class="panel-title">TEAM SIGNAL</h2>
+                <h2 class="panel-title">DODGE RESULT</h2>
                 <span class="step">02 / VERDICT</span>
             </div>
             <div class="team-body">
@@ -1261,18 +1501,18 @@
                 <div class="team-result">
                     <span>CURRENT VERDICT</span>
                     <strong id="team-verdict">STANDBY</strong>
-                    <p id="team-description">분석 결과가 여기에 표시됩니다.</p>
+                    <p id="team-description">아직 판독 전이야. 닉네임부터 입력해.</p>
                 </div>
                 <div class="legend">
                     <div class="legend-row">
                         <span class="legend-label">
-                            <i class="legend-light" style="--light: var(--green)"></i>좋음 / NOT DODGE
+                            <i class="legend-light" style="--light: var(--green)"></i>PLAY
                         </span>
                         <span>55-100</span>
                     </div>
                     <div class="legend-row">
                         <span class="legend-label">
-                            <i class="legend-light" style="--light: var(--red)"></i>주의
+                            <i class="legend-light" style="--light: var(--red)"></i>DODGE
                         </span>
                         <span>0-54</span>
                     </div>
@@ -1283,8 +1523,8 @@
 
     <section id="my-view" class="my-view" hidden>
         <div class="panel-header">
-            <h1 class="panel-title">개인 전적 상세 분석</h1>
-            <span class="step">DETAILED REPORT</span>
+            <h1 class="panel-title">내 전적 분석</h1>
+            <span class="step">PERSONAL REPORT</span>
         </div>
         <form id="my-form" class="my-form" novalidate>
             <div class="field">
@@ -1292,18 +1532,18 @@
                 <input id="my-nickname" maxlength="30" autocomplete="off"
                        placeholder="내 닉네임">
             </div>
-            <button id="my-submit" class="submit-button" type="submit">ANALYZE</button>
+            <button id="my-submit" class="submit-button" type="submit">전적 분석</button>
             <p id="my-error" class="form-error" role="alert"></p>
         </form>
         <div id="my-loading" class="status-line" role="status">
             <span class="status-dot"></span>
-            PERSONAL RANK REPORT IN PROGRESS
+            ANALYZING PLAYER DATA...
         </div>
         <div id="my-result" class="my-result">
             <div id="my-empty" class="empty-state">
                 <div>
-                    <strong>WAITING FOR PLAYER DATA</strong>
-                    <span>닉네임 한 명을 입력하면 전적을 상세 분석합니다.</span>
+                    <strong>NO PLAYER SELECTED</strong>
+                    <span>닉네임 하나만 입력해. 최근 기록까지 볼게.</span>
                 </div>
             </div>
             <div id="my-output"></div>
@@ -1312,20 +1552,20 @@
 
     <section id="patch-view" class="patch-view" hidden>
         <div class="panel-header">
-            <h1 class="panel-title">PATCH HISTORY</h1>
-            <span class="step">CHARACTER LOG</span>
+            <h1 class="panel-title">PATCH LOG</h1>
+            <span class="step">CHARACTER HISTORY</span>
         </div>
         <div id="patch-loading" class="status-line" role="status">
             <span class="status-dot"></span>
-            CHARACTER PATCH DATA LOADING
+            LOADING PATCH DATA...
         </div>
         <div class="patch-layout">
             <section id="character-grid" class="character-grid" aria-label="캐릭터 목록"></section>
             <aside id="patch-detail" class="patch-detail">
                 <div class="patch-empty">
                     <div>
-                        <strong>캐릭터를 선택하세요</strong>
-                        <span>썸네일을 누르면 이번 시즌 패치 내역을 표시합니다.</span>
+                        <strong>캐릭터를 골라.</strong>
+                        <span>이번 시즌에 뭐가 바뀌었는지 보여줄게.</span>
                     </div>
                 </div>
             </aside>
@@ -1334,7 +1574,7 @@
 
     <section id="score-view" class="score-view" hidden>
         <div class="dialog-header">
-            <h2>점수 산정표 / 100점 감점제</h2>
+            <h2>닷지 판독 기준 / 100점 감점제</h2>
         </div>
         <div class="score-content">
         <section class="score-section">
@@ -1536,11 +1776,18 @@
         </section>
         <p class="score-note">
             현재 계산은 100점에서 다섯 영역의 감점을 차감하는 방식입니다.
-            최종 판정 기준은 좋음 55점 이상, 주의 55점 미만입니다.
-            NaN·결측·0점 오류 의심 항목은 감점하지 않으며, 전체 랭크 20판 미만 또는 비교 데이터 부족은 NOT DODGE입니다.
+            최종 판정 기준은 PLAY 55점 이상, DODGE 55점 미만입니다.
+            NaN·결측·0점 오류 의심 항목은 감점하지 않으며, 전체 랭크 20판 미만 또는 비교 데이터 부족은 NO DATA로 보호합니다.
         </p>
         </div>
     </section>
+    <footer class="service-disclaimer site-footer">
+        <strong>니아의 닷지 판독기</strong>
+        <span>Unofficial Eternal Return fan project. 이 사이트는 공개 전적 기반 참고 정보를 제공하며, 님블뉴런의 공식 서비스가 아닙니다. 최종 선택은 이용자에게 있습니다.</span>
+        <button id="footer-score-link" class="footer-link" type="button">채점표</button>
+        <span>·</span>
+        <a class="footer-link" href="https://naver.me/5RASOdAk" target="_blank" rel="noopener noreferrer">문의하기</a>
+    </footer>
 </main>
 
 <script>
@@ -1550,6 +1797,8 @@
     const results = document.getElementById("results");
     const emptyState = document.getElementById("empty-state");
     const formError = document.getElementById("form-error");
+    const ocrPasteZone = document.getElementById("ocr-paste-zone");
+    const ocrMessage = document.getElementById("ocr-message");
     const teamSignal = document.getElementById("team-signal");
     const teamVerdict = document.getElementById("team-verdict");
     const teamDescription = document.getElementById("team-description");
@@ -1565,6 +1814,7 @@
     const characterGrid = document.getElementById("character-grid");
     const patchDetail = document.getElementById("patch-detail");
     const viewTabs = document.querySelectorAll(".view-tab");
+    const footerScoreLink = document.getElementById("footer-score-link");
     const myForm = document.getElementById("my-form");
     const myNickname = document.getElementById("my-nickname");
     const mySubmit = document.getElementById("my-submit");
@@ -1582,9 +1832,14 @@
     }
 
     function signalFor(score, protectedVerdict = false) {
-        if (protectedVerdict) return {color: "#55e39b", key: "proceed", label: "NOT DODGE"};
-        if (score >= 55) return {color: "#55e39b", key: "proceed", label: "좋음"};
-        return {color: "#ff5d6c", key: "dodge", label: "주의"};
+        if (protectedVerdict) return {color: "#8b5cf6", key: "proceed", label: "PLAY"};
+        if (score >= 55) return {color: "#8b5cf6", key: "proceed", label: "PLAY"};
+        return {color: "#f45ea2", key: "dodge", label: "DODGE"};
+    }
+
+    function displayGrade(player) {
+        if (player?.analysisStatus === "no_recent_rank" || player?.dodgeProtected) return "NO DATA";
+        return signalFor(player?.score || 0).label;
     }
 
     function trafficSignalMarkup(signal) {
@@ -1648,7 +1903,7 @@
             const response = await fetch("/api/patches/characters");
             const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.error || "패치 내역을 불러오지 못했습니다.");
+                throw new Error(data.error || "패치 내역을 못 불러왔어.");
             }
             renderCharacterGrid(data.characters);
             patchCharactersLoaded = true;
@@ -1656,8 +1911,8 @@
             patchDetail.innerHTML = `
                 <div class="patch-empty">
                     <div>
-                        <strong>패치 내역 오류</strong>
-                        <span>${escapeHtml(error.message || "서버에 연결하지 못했습니다.")}</span>
+                        <strong>LOAD FAILED</strong>
+                        <span>${escapeHtml(error.message || "서버에 연결하지 못했어.")}</span>
                     </div>
                 </div>
             `;
@@ -1689,8 +1944,8 @@
             : `
                 <div class="patch-empty">
                     <div>
-                        <strong>이번 시즌 패치 내역 없음</strong>
-                        <span>11.* 정규 패치에서 이 캐릭터의 변경 내역을 찾지 못했습니다.</span>
+                        <strong>NO PATCH DATA</strong>
+                        <span>이번 시즌 정규 패치에서 이 캐릭터의 변경 내역을 찾지 못했어.</span>
                     </div>
                 </div>
             `;
@@ -1714,25 +1969,23 @@
             <div class="patch-empty">
                 <div>
                     <strong>${escapeHtml(characterName)}</strong>
-                    <span>패치 내역을 불러오는 중입니다.</span>
+                    <span>패치 내역 불러오는 중. 잠깐만.</span>
                 </div>
             </div>
         `;
         try {
-            const response = await fetch(
-                `/.netlify/functions/patch-character?name=${encodeURIComponent(characterName)}`
-            );
+            const response = await fetch(`/api/patches/characters/${encodeURIComponent(characterName)}`);
             const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.error || "캐릭터 패치 내역을 불러오지 못했습니다.");
+                throw new Error(data.error || "캐릭터 패치 내역을 못 불러왔어.");
             }
             renderPatchDetail(data);
         } catch (error) {
             patchDetail.innerHTML = `
                 <div class="patch-empty">
                     <div>
-                        <strong>조회 실패</strong>
-                        <span>${escapeHtml(error.message || "서버에 연결하지 못했습니다.")}</span>
+                        <strong>LOAD FAILED</strong>
+                        <span>${escapeHtml(error.message || "서버에 연결하지 못했어.")}</span>
                     </div>
                 </div>
             `;
@@ -1741,10 +1994,11 @@
 
     function renderCard(player, index) {
         const nickname = escapeHtml(player.nickname || `팀원 ${index + 1}`);
+        const sampleComment = rankSampleComment(player);
         if (player.error) {
             return `
                 <article class="player-card error-card" style="--signal: #ff5d6c">
-                    <span class="card-index">TEAMMATE 0${index + 1} / ERROR</span>
+                    <span class="card-index">PLAYER 0${index + 1} / LOAD FAILED</span>
                     <h2 class="player-name">${nickname}</h2>
                     <p class="error-message">${escapeHtml(player.error)}</p>
                 </article>
@@ -1759,18 +2013,19 @@
             };
             return `
                 <article class="player-card" style="--signal: ${pendingSignal.color}">
-                    <span class="card-index">TEAMMATE 0${index + 1} / NO RECENT RANK</span>
+                    <span class="card-index">PLAYER 0${index + 1} / NO DATA</span>
                     <div class="card-main">
                         ${trafficSignalMarkup(pendingSignal)}
                         <div>
                             <h2 class="player-name">${nickname}</h2>
                             <div class="score">--<small>/100</small></div>
-                            <div class="grade">분석 보류</div>
+                            <div class="grade">NO DATA</div>
                         </div>
                     </div>
-                    <p class="comment">최근 20게임 안에 랭크게임이 확인되지 않습니다.</p>
+                    <p class="comment">최근 20게임 안에 랭크게임이 확인되지 않았어. 억지로 판정하진 않을게.</p>
+                    ${sampleComment}
                     <div class="warnings">
-                        <span class="warning">최근에는 일반게임을 이용한 것으로 보입니다.</span>
+                        <span class="warning">최근에는 일반게임을 이용한 것으로 보여.</span>
                     </div>
                 </article>
             `;
@@ -1785,19 +2040,31 @@
 
         return `
             <article class="player-card" style="--signal: ${signal.color}">
-                <span class="card-index">TEAMMATE 0${index + 1} / ANALYZED</span>
+                    <span class="card-index">PLAYER 0${index + 1} / CHECK COMPLETE</span>
                 <div class="card-main">
                     ${trafficSignalMarkup(signal)}
                     <div>
                         <h2 class="player-name">${nickname}</h2>
                         <div class="score">${player.score}<small>/100</small></div>
-                        <div class="grade">${escapeHtml(player.grade)}</div>
+                        <div class="grade">${escapeHtml(displayGrade(player))}</div>
                     </div>
                 </div>
                 <p class="comment">${escapeHtml(player.comment)}</p>
+                ${sampleComment}
                 ${warnings}
             </article>
         `;
+    }
+
+    function rankSampleComment(player) {
+        const metrics = player?.metrics || {};
+        const fetchedGames = Number(metrics.fetchedGames || 0);
+        const recentRankGames = Number(metrics.recentGames || 0);
+        const normalGames = Math.max(0, fetchedGames - recentRankGames);
+        if (fetchedGames >= 20 && normalGames >= 10 && recentRankGames <= 9) {
+            return `<p class="comment">\uCD5C\uADFC 20\uAC8C\uC784\uC5D0 \uC77C\uBC18\uAC8C\uC784\uC774 \uB7AD\uD06C\uAC8C\uC784\uBCF4\uB2E4 \uB9CE\uC740 \uC720\uC800\uC785\uB2C8\uB2E4.</p>`;
+        }
+        return "";
     }
 
     function updateTeamSignal(players) {
@@ -1805,19 +2072,19 @@
         teamSignal.classList.remove("signal-proceed", "signal-dodge");
         if (!validPlayers.length || validPlayers.length !== players.length) {
             teamSignal.classList.add("signal-dodge");
-            teamSignal.style.setProperty("--team-color", "#ff5d6c");
-            teamVerdict.style.setProperty("--team-color", "#ff5d6c");
-            teamVerdict.textContent = "CHECK FAILED";
-            teamDescription.textContent = "입력한 팀원의 전적을 확인하지 못했습니다.";
+            teamSignal.style.setProperty("--team-color", "#f45ea2");
+            teamVerdict.style.setProperty("--team-color", "#f45ea2");
+            teamVerdict.textContent = "LOAD FAILED";
+            teamDescription.textContent = "서버와 기록을 확인하지 못했어. 잠깐 뒤에 다시 시도해 봐.";
             return;
         }
 
         if (validPlayers.some(player => player.analysisStatus === "no_recent_rank")) {
             teamSignal.style.setProperty("--team-color", "#a7a2aa");
             teamVerdict.style.setProperty("--team-color", "#a7a2aa");
-            teamVerdict.textContent = "분석 보류";
+            teamVerdict.textContent = "NO DATA";
             teamDescription.textContent =
-                "최근 20게임 안에 랭크게임이 확인되지 않는 대상이 있어 점수를 산출하지 않았습니다.";
+                "최근 20게임 안에서 현재 시즌 랭크 기록이 부족해. 이번 판정은 보류할게.";
             return;
         }
 
@@ -1828,9 +2095,9 @@
         const signal = signalFor(lowestScore);
         const descriptions = {
             proceed: validPlayers.length === 1
-                ? "해당 팀원의 지표가 좋습니다."
-                : "두 팀원 모두 좋은 지표를 보입니다.",
-            dodge: "함께 플레이하기 전 세부 지표 확인을 권장합니다."
+                ? "큰 위험 신호는 없어. 이 판은 시작해도 돼."
+                : "두 플레이어 모두 큰 위험 신호는 없어. 게임, 할래?",
+            dodge: "이건 잠깐 멈춰. 닷지를 추천해."
         };
 
         teamSignal.classList.add(`signal-${signal.key}`);
@@ -1886,31 +2153,125 @@
             const damage = character.averageDamage === null ? null : Math.round(character.averageDamage);
             const baselineDamage = Math.round(character.baselineAverageDamage);
             const placementSource = character.recentPlacementGames
-                ? `최근 ${character.recentPlacementGames}판`
-                : "시즌 기록";
+                ? `\uCD5C\uADFC ${character.recentPlacementGames}\uD310`
+                : "\uC2DC\uC98C \uAE30\uB85D";
             return `
                 <div class="comparison-row">
                     <div class="comparison-character">
                         <strong>${escapeHtml(character.characterName)}</strong>
-                        <small>시즌 ${character.games.toLocaleString("ko-KR")}판 · 티어 표본 ${character.baselineGames.toLocaleString("ko-KR")}판</small>
+                        <small>\uC2DC\uC98C ${character.games.toLocaleString("ko-KR")}\uD310 \u00B7 \uD2F0\uC5B4 \uD45C\uBCF8 ${character.baselineGames.toLocaleString("ko-KR")}\uD310</small>
                     </div>
-                    ${comparisonStat("승률", `${win.toFixed(1)}%`, `${baselineWin.toFixed(1)}%`, win - baselineWin)}
+                    ${comparisonStat("\uC2B9\uB960", `${win.toFixed(1)}%`, `${baselineWin.toFixed(1)}%`, win - baselineWin)}
                     ${comparisonStat("TOP 3", `${top3.toFixed(1)}%`, `${baselineTop3.toFixed(1)}%`, top3 - baselineTop3)}
-                    ${comparisonStat(`평균 순위 (${placementSource})`, `${Number(character.averagePlacement).toFixed(2)}위`, `${character.baselineAveragePlacement.toFixed(2)}위`, character.averagePlacementDelta, true)}
-                    ${comparisonStat("최근 딜량", damage === null ? null : damage.toLocaleString("ko-KR"), baselineDamage.toLocaleString("ko-KR"), character.averageDamageDelta)}
+                    ${comparisonStat(`\uD3C9\uADE0 \uC21C\uC704 (${placementSource})`, `${Number(character.averagePlacement).toFixed(2)}\uC704`, `${character.baselineAveragePlacement.toFixed(2)}\uC704`, character.averagePlacementDelta, true)}
+                    ${comparisonStat("\uCD5C\uADFC \uB51C\uB7C9", damage === null ? null : damage.toLocaleString("ko-KR"), baselineDamage.toLocaleString("ko-KR"), character.averageDamageDelta)}
                 </div>
             `;
         }).join("");
         return `
-            <section class="tier-comparison" aria-label="티어 및 실험체 평균 비교">
+            <section class="tier-comparison" aria-label="\uD2F0\uC5B4 \uBC0F \uC2E4\uD5D8\uCCB4 \uD3C9\uADE0 \uBE44\uAD50">
                 <div class="comparison-head">
-                    <h3>모스트 실험체 티어 대비</h3>
-                    <p>${escapeHtml(comparison.tierLabel)} 통계 · 최근 ${comparison.periodDays}일 · 패치 ${comparison.sourcePatch}</p>
+                    <h3>\uCD5C\uADFC 20\uAC8C\uC784 \uC911 \uBAA8\uC2A4\uD2B8 \uC2E4\uD5D8\uCCB4 \uD2F0\uC5B4 \uB300\uBE44</h3>
+                    <p>${escapeHtml(comparison.tierLabel)} \uD1B5\uACC4 \u00B7 \uCD5C\uADFC ${comparison.periodDays}\uC77C \u00B7 \uD328\uCE58 ${comparison.sourcePatch}</p>
                 </div>
                 <div class="comparison-list">${rows}</div>
             </section>
         `;
     }
+
+
+    function coachAnalysisMarkup(analysis) {
+        if (!analysis) return "";
+        const strengths = Array.isArray(analysis.strengths) ? analysis.strengths : [];
+        const issues = Array.isArray(analysis.issues) ? analysis.issues : [];
+        const crossAnalysis = Array.isArray(analysis.crossAnalysis) ? analysis.crossAnalysis : [];
+        const characterAnalysis = Array.isArray(analysis.characterAnalysis) ? analysis.characterAnalysis : [];
+        const limitations = Array.isArray(analysis.limitations) ? analysis.limitations : [];
+        const next = analysis.nextGameFeedback || {};
+        const primary = analysis.primaryWeakness;
+        const T = {
+            empty: "\uD45C\uC2DC\uD560 \uB0B4\uC6A9\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
+            aria: "AI \uCF54\uCE58 \uBD84\uC11D",
+            title: "AI \uCF54\uCE58 \uBD84\uC11D",
+            confidence: "\uC2E0\uB8B0\uB3C4",
+            primary: "\uD575\uC2EC \uC57D\uC810",
+            noPrimary: "\uB69C\uB837\uD55C \uD575\uC2EC \uC57D\uC810\uC740 \uD655\uC778\uB418\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4.",
+            strengths: "\uAC15\uC810",
+            issues: "\uC810\uAC80 \uD56D\uBAA9",
+            cross: "\uAD50\uCC28 \uBD84\uC11D",
+            characters: "\uCE90\uB9AD\uD130 \uBD84\uC11D",
+            limits: "\uBD84\uC11D \uD55C\uACC4",
+            next: "\uB2E4\uC74C \uD310 \uD53C\uB4DC\uBC31",
+            when: "\uC5B8\uC81C",
+            check: "\uD655\uC778",
+            fallback: "\uB2E4\uC74C \uB7AD\uD06C \uD45C\uBCF8\uC744 \uB354 \uD655\uBCF4\uD574 \uBCF4\uC138\uC694.",
+            strength: "\uAC15\uC810",
+            weakness: "\uC57D\uC810"
+        };
+        const list = (items, mapper) => items.length
+            ? `<ul>${items.map(mapper).join("")}</ul>`
+            : `<p>${T.empty}</p>`;
+
+        return `
+            <section class="coach-analysis" aria-label="${T.aria}">
+                <span class="coach-status">${escapeHtml(analysis.analysisStatus || "analysis")}</span>
+                <h3>${escapeHtml(analysis.headline || T.title)}</h3>
+                <p class="coach-summary">${escapeHtml(analysis.summary || "")}</p>
+                <div class="coach-grid">
+                    <div class="coach-box">
+                        <strong>${T.confidence}</strong>
+                        <p>${escapeHtml(analysis.confidence?.level || "-")} · ${escapeHtml(analysis.confidence?.reason || "")}</p>
+                    </div>
+                    <div class="coach-box">
+                        <strong>${T.primary}</strong>
+                        ${primary ? `
+                            <p>${escapeHtml(primary.title || "")}</p>
+                            <p>${escapeHtml(primary.observation || "")}</p>
+                        ` : `<p>${T.noPrimary}</p>`}
+                    </div>
+                    <div class="coach-box">
+                        <strong>${T.strengths}</strong>
+                        ${list(strengths, item => `
+                            <li><b>${escapeHtml(item.title || "")}</b><br>${escapeHtml(item.observation || item.interpretation || "")}</li>
+                        `)}
+                    </div>
+                    <div class="coach-box">
+                        <strong>${T.issues}</strong>
+                        ${list(issues, item => `
+                            <li><b>${escapeHtml(item.title || "")}</b><br>${escapeHtml(item.observation || "")}</li>
+                        `)}
+                    </div>
+                    <div class="coach-box">
+                        <strong>${T.cross}</strong>
+                        ${list(crossAnalysis, item => `
+                            <li><b>${escapeHtml(item.title || "")}</b><br>${escapeHtml(item.observation || "")}</li>
+                        `)}
+                    </div>
+                    <div class="coach-box">
+                        <strong>${T.characters}</strong>
+                        ${list(characterAnalysis, item => `
+                            <li>
+                                <b>${escapeHtml(item.character || "")}</b><br>
+                                ${escapeHtml(item.assessment || "")}
+                                ${item.strength ? `<br>${T.strength}: ${escapeHtml(item.strength)}` : ""}
+                                ${item.weakness ? `<br>${T.weakness}: ${escapeHtml(item.weakness)}` : ""}
+                            </li>
+                        `)}
+                    </div>
+                    <div class="coach-box">
+                        <strong>${T.limits}</strong>
+                        ${list(limitations, item => `<li>${escapeHtml(item)}</li>`)}
+                    </div>
+                </div>
+                <div class="coach-next">
+                    <h4>${T.next}</h4>
+                    <p>${escapeHtml(next.message || T.fallback)}</p>
+                    <p><b>${T.when}:</b> ${escapeHtml(next.timing || "-")} · <b>${T.check}:</b> ${escapeHtml(next.successCheck || "-")}</p>
+                </div>
+            </section>
+        `;
+    }
+
 
     function renderMyResult(player) {
         if (player.error) {
@@ -2002,8 +2363,8 @@
                 ${comparisonMarkup(player.comparison)}
                 <section class="score-receipt" aria-label="점수 산정 영수증">
                     <div class="receipt-head">
-                        <strong>ER DODGE CHECK</strong>
-                        <span>PERSONAL SCORE RECEIPT · ${escapeHtml(player.nickname)}</span>
+                        <strong>니아의 닷지 판독기</strong>
+                        <span>DODGE CHECK RECEIPT · ${escapeHtml(player.nickname)}</span>
                     </div>
                     <div class="receipt-items">
                         ${receiptRows}
@@ -2029,7 +2390,7 @@
                         </div>
                     </div>
                     <p class="receipt-verdict">
-                        ${escapeHtml(player.grade)}${player.comment ? ` · ${escapeHtml(player.comment)}` : ""}
+                        ${escapeHtml(displayGrade(player))}${player.comment ? ` · ${escapeHtml(player.comment)}` : ""}
                     </p>
                 </section>
                 <aside class="sample-notice" aria-label="표본 보호 안내">
@@ -2041,24 +2402,42 @@
                         최근 랭크 표본이 적으면 피해량과 시야 지표의 변동성이 커질 수 있으며,
                         캐릭터 성과는 시즌 전체 10판 이상 사용했고 최근 랭크에서 3판 이상 확인된 캐릭터를 개별 평가합니다.
                         결측값이나 0점 오류가 의심되는 항목은 감점하지 않으며,
-                        전체 랭크 20판 미만 또는 유효 평가 영역이 4개 미만이면 <b>NOT DODGE</b>로 보호합니다.
+                        전체 랭크 20판 미만 또는 유효 평가 영역이 4개 미만이면 <b>NO DATA</b>로 보호합니다.
+                        <br><br>
+                        쉽게말해서, 이 유저의 최근폼 일 뿐, 계속 못하고/잘하고 있는것이 아닙니다.
                     </p>
                 </aside>
+                <section class="healthy-feedback" aria-label="\uAC74\uC804\uD55C \uD53C\uB4DC\uBC31">
+                    <button class="healthy-feedback-button" type="button">건피</button>
+                    <div class="healthy-feedback-panel" hidden>
+                        <img class="healthy-feedback-image" src="/static/healthy-feedback.png" alt="\uAC74\uC804\uD55C \uD53C\uB4DC\uBC31 \uC774\uBBF8\uC9C0">
+                        <div class="healthy-feedback-body">
+                            <h3>블붕아 여기 앉아봐라</h3>
+                            <div class="healthy-feedback-content">
+                                <p>다음 판에서 제일 먼저 바꿀 행동부터 정리할게.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
         `;
     }
 
+    function showView(view, activeTab = null) {
+        teamView.hidden = view !== "team";
+        myView.hidden = view !== "my";
+        patchView.hidden = view !== "patch";
+        scoreView.hidden = view !== "score";
+        viewTabs.forEach(item => item.classList.toggle("active", item === activeTab));
+        if (view === "patch") loadPatchCharacters();
+        if (view === "score") scoreView.scrollIntoView({behavior: "smooth", block: "start"});
+    }
+
     viewTabs.forEach(tab => {
-        tab.addEventListener("click", () => {
-            const view = tab.dataset.view;
-            teamView.hidden = view !== "team";
-            myView.hidden = view !== "my";
-            patchView.hidden = view !== "patch";
-            scoreView.hidden = view !== "score";
-            viewTabs.forEach(item => item.classList.toggle("active", item === tab));
-            if (view === "patch") loadPatchCharacters();
-        });
+        tab.addEventListener("click", () => showView(tab.dataset.view, tab));
     });
+
+    footerScoreLink.addEventListener("click", () => showView("score"));
 
     characterGrid.addEventListener("click", event => {
         const card = event.target.closest(".character-card");
@@ -2069,6 +2448,84 @@
         loadCharacterPatchDetail(card.dataset.character);
     });
 
+    function extractNicknameCandidate(text) {
+        const blocked = new Set(["PLAYER", "NAME", "RANK", "RANKED", "LEVEL", "TEAM", "MATCH"]);
+        const lines = String(text || "")
+            .normalize("NFKC")
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(Boolean)
+            .filter(line => !blocked.has(line.toUpperCase()));
+        return lines
+            .sort((a, b) => {
+                const aScore = /[가-힣A-Za-z0-9_]/.test(a) ? a.length : 0;
+                const bScore = /[가-힣A-Za-z0-9_]/.test(b) ? b.length : 0;
+                return bScore - aScore;
+            })[0] || "";
+    }
+
+    function fillOcrNickname(nickname) {
+        const target = inputs.find(input => !input.value.trim()) || inputs[0];
+        target.value = nickname;
+        target.focus();
+    }
+
+    let ocrInProgress = false;
+
+    async function runOcrFromImage(image) {
+        if (ocrInProgress) return;
+        ocrInProgress = true;
+        const formData = new FormData();
+        formData.append("image", image);
+        ocrPasteZone.setAttribute("aria-busy", "true");
+        ocrMessage.textContent = "닉네임 읽는 중. 잠깐만.";
+
+        try {
+            const response = await fetch("/api/ocr", {
+                method: "POST",
+                body: formData
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "이미지를 읽지 못했어. 한 번만 다시 붙여넣어 봐.");
+            }
+
+            const nickname = extractNicknameCandidate(data.text);
+            if (nickname) {
+                fillOcrNickname(nickname);
+                ocrMessage.textContent = "읽었어. 빈 플레이어 칸에 넣어 둠.";
+            } else {
+                ocrMessage.textContent = data.message || "닉네임을 못 찾았어. 글자 부분만 더 크게 캡처해 봐.";
+            }
+        } catch (error) {
+            ocrMessage.textContent = error.message || "이미지를 읽지 못했어. 한 번만 다시 붙여넣어 봐.";
+        } finally {
+            ocrInProgress = false;
+            ocrPasteZone.removeAttribute("aria-busy");
+        }
+    }
+
+    function imageFromPasteEvent(event) {
+        const items = Array.from(event.clipboardData?.items || []);
+        const imageItem = items.find(item => item.type.startsWith("image/"));
+        return imageItem?.getAsFile() || null;
+    }
+
+    function handleOcrPaste(event) {
+        const image = imageFromPasteEvent(event);
+        if (!image) return;
+        event.preventDefault();
+        event.stopPropagation();
+        runOcrFromImage(image);
+    }
+
+    ocrPasteZone.addEventListener("paste", handleOcrPaste);
+    document.addEventListener("paste", event => {
+        if (teamView.hidden) return;
+        if (event.target.closest?.("#ocr-paste-zone")) return;
+        handleOcrPaste(event);
+    });
+
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
         const nicknames = inputs
@@ -2077,19 +2534,19 @@
         formError.textContent = "";
 
         if (!nicknames.length) {
-            formError.textContent = "팀원 닉네임을 한 명 이상 입력해 주세요.";
+            formError.textContent = "닉네임을 한 명 이상 입력해.";
             return;
         }
         if (
             nicknames.length === 2
             && nicknames[0].toLocaleLowerCase() === nicknames[1].toLocaleLowerCase()
         ) {
-            formError.textContent = "서로 다른 두 닉네임을 입력해 주세요.";
+            formError.textContent = "서로 다른 두 닉네임을 입력해.";
             return;
         }
 
         button.disabled = true;
-        button.textContent = "SCANNING";
+        button.textContent = "CHECKING...";
         loading.classList.add("visible");
         emptyState.hidden = true;
         results.innerHTML = "";
@@ -2102,19 +2559,21 @@
             });
             const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.error || "요청을 처리하지 못했습니다.");
+                throw new Error(data.error || "요청을 처리하지 못했어.");
             }
             results.innerHTML = data.results.map(renderCard).join("");
             updateTeamSignal(data.results);
         } catch (error) {
-            formError.textContent = error.message || "서버에 연결하지 못했습니다.";
+            formError.textContent = error.message || "서버에 연결하지 못했어.";
             emptyState.hidden = false;
         } finally {
             button.disabled = false;
-            button.textContent = "SCAN";
+            button.textContent = "DODGE CHECK";
             loading.classList.remove("visible");
         }
     });
+
+    let latestMyResult = null;
 
     myForm.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -2122,12 +2581,12 @@
         myError.textContent = "";
 
         if (!nickname) {
-            myError.textContent = "닉네임을 입력해 주세요.";
+            myError.textContent = "닉네임을 입력해.";
             return;
         }
 
         mySubmit.disabled = true;
-        mySubmit.textContent = "ANALYZING";
+        mySubmit.textContent = "ANALYZING...";
         myLoading.classList.add("visible");
         myEmpty.hidden = true;
         myOutput.innerHTML = "";
@@ -2140,19 +2599,80 @@
             });
             const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.error || "요청을 처리하지 못했습니다.");
+                throw new Error(data.error || "요청을 처리하지 못했어.");
             }
+            latestMyResult = data.result;
             myOutput.innerHTML = renderMyResult(data.result);
             await convertReceiptToImage();
         } catch (error) {
-            myError.textContent = error.message || "서버에 연결하지 못했습니다.";
+            myError.textContent = error.message || "서버에 연결하지 못했어.";
             myEmpty.hidden = false;
         } finally {
             mySubmit.disabled = false;
-            mySubmit.textContent = "ANALYZE";
+            mySubmit.textContent = "전적 분석";
             myLoading.classList.remove("visible");
         }
     });
+
+    function renderHealthyFeedback(feedback) {
+        const problems = Array.isArray(feedback.problems) ? feedback.problems : [];
+        const next = feedback.nextAction || {};
+        const visibleProblems = problems.slice(0, 3).filter(problem =>
+            (problem?.title || problem?.detail)
+        );
+        const problemTitle = visibleProblems.length
+            ? `\uC6B0\uC120 \uACE0\uCE60 ${visibleProblems.length}\uAC1C`
+            : "\uC9C0\uAE08 \uD655\uC815\uD560 \uD070 \uBB38\uC81C\uB294 \uC5C6\uC5B4";
+        const problemBody = visibleProblems.length
+            ? `<ol>
+                ${visibleProblems.map(problem => `
+                    <li>
+                        <b>${escapeHtml(problem.title || "\uC810\uAC80 \uD56D\uBAA9")}</b><br>
+                        ${escapeHtml(problem.detail || "\uC138\uBD80 \uADFC\uAC70\uAC00 \uBD80\uC871\uD574.")}
+                    </li>
+                `).join("")}
+            </ol>`
+            : `<p>\uC5B5\uC9C0\uB85C \uBB38\uC81C\uB97C \uC9C0\uC5B4\uB0B4\uC9C4 \uC54A\uC744\uAC8C. \uB2E4\uC74C \uD310\uC5D0\uC11C \uD558\uB098\uB9CC \uD655\uC778\uD574 \uBCF4\uC790.</p>`;
+        return `
+            <h4>\uB2E4\uC74C \uD310\uC5D0 \uD560 \uAC83</h4>
+            <p>${escapeHtml(next.message || "\uB2E4\uC74C \uD310\uC5D0\uC11C \uD655\uC778\uD560 \uD589\uB3D9\uC744 \uD558\uB098 \uC815\uD574 \uBD10.")}</p>
+            <p><b>\uC5B8\uC81C:</b> ${escapeHtml(next.timing || "\uB2E4\uC74C \uB7AD\uD06C \uACBD\uAE30")} · <b>\uD655\uC778:</b> ${escapeHtml(next.successCheck || "\uACBD\uAE30 \uD6C4 \uC2E4\uD589 \uC5EC\uBD80")}</p>
+            <h4>${problemTitle}</h4>
+            ${problemBody}
+        `;
+    }
+
+
+    myOutput.addEventListener("click", async (event) => {
+        const trigger = event.target.closest(".healthy-feedback-button");
+        if (!trigger) return;
+        const wrapper = trigger.closest(".healthy-feedback");
+        const panel = wrapper?.querySelector(".healthy-feedback-panel");
+        const content = wrapper?.querySelector(".healthy-feedback-content");
+        if (!panel || !content || !latestMyResult) return;
+
+        panel.hidden = false;
+        trigger.disabled = true;
+        trigger.textContent = "CHECKING...";
+        content.innerHTML = `<p>\uB9AC\uD50C\uB808\uC774 \uB2E4\uC2DC \uBCF4\uB294 \uC911. \uC7A0\uAE50\uB9CC.</p>`;
+
+        try {
+            const response = await fetch("/analyze/feedback", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({result: latestMyResult})
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "\uD53C\uB4DC\uBC31\uC744 \uBABB \uBD88\uB7EC\uC654\uC5B4. \uD55C \uBC88\uB9CC \uB2E4\uC2DC \uB20C\uB7EC \uBD10.");
+            content.innerHTML = renderHealthyFeedback(data.feedback || {});
+        } catch (error) {
+            content.innerHTML = `<p class="healthy-feedback-error">${escapeHtml(error.message || "\uD53C\uB4DC\uBC31\uC744 \uBABB \uBD88\uB7EC\uC654\uC5B4. \uD55C \uBC88\uB9CC \uB2E4\uC2DC \uB20C\uB7EC \uBD10.")}</p>`;
+        } finally {
+            trigger.disabled = false;
+            trigger.textContent = "\uAC74\uD53C";
+        }
+    });
+
     async function convertReceiptToImage() {
         const receipt = myOutput.querySelector(".score-receipt");
         if (!receipt || typeof window.html2canvas !== "function") return;
