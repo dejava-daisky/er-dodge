@@ -102,9 +102,10 @@ export function compareMostCharacters(stats, recentGames, dakggStats, limit = 5)
   for (const game of recentGames) {
     const characterId = Number(game.characterNum);
     if (!Number.isInteger(characterId)) continue;
-    const item = recentByCharacter.get(characterId) || { games: 0, damage: 0 };
+    const item = recentByCharacter.get(characterId) || { games: 0, damage: 0, rank: 0 };
     item.games += 1;
     item.damage += Number(game.damageToPlayer) || 0;
+    item.rank += Number(game.gameRank) || 9;
     recentByCharacter.set(characterId, item);
   }
 
@@ -120,7 +121,10 @@ export function compareMostCharacters(stats, recentGames, dakggStats, limit = 5)
       const recent = recentByCharacter.get(characterId);
       const winRate = games ? (Number(character.wins) || 0) / games : 0;
       const top3Rate = games ? (Number(character.top3) || 0) / games : 0;
-      const averagePlacement = Number(character.averageRank) || null;
+      const seasonAveragePlacement = Number(character.averageRank) || null;
+      const averagePlacement = recent?.games
+        ? recent.rank / recent.games
+        : seasonAveragePlacement;
       const averageDamage = recent?.games ? recent.damage / recent.games : null;
       return {
         characterId,
@@ -135,6 +139,8 @@ export function compareMostCharacters(stats, recentGames, dakggStats, limit = 5)
         top3Rate,
         baselineTop3Rate: baseline.top3Rate,
         averagePlacement,
+        seasonAveragePlacement,
+        recentPlacementGames: recent?.games || 0,
         baselineAveragePlacement: baseline.averagePlacement,
         recentDamageGames: recent?.games || 0,
         averageDamage,

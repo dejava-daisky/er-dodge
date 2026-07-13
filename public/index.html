@@ -1885,6 +1885,9 @@
             const baselineTop3 = character.baselineTop3Rate * 100;
             const damage = character.averageDamage === null ? null : Math.round(character.averageDamage);
             const baselineDamage = Math.round(character.baselineAverageDamage);
+            const placementSource = character.recentPlacementGames
+                ? `최근 ${character.recentPlacementGames}판`
+                : "시즌 기록";
             return `
                 <div class="comparison-row">
                     <div class="comparison-character">
@@ -1893,7 +1896,7 @@
                     </div>
                     ${comparisonStat("승률", `${win.toFixed(1)}%`, `${baselineWin.toFixed(1)}%`, win - baselineWin)}
                     ${comparisonStat("TOP 3", `${top3.toFixed(1)}%`, `${baselineTop3.toFixed(1)}%`, top3 - baselineTop3)}
-                    ${comparisonStat("평균 순위", `${Number(character.averagePlacement).toFixed(2)}위`, `${character.baselineAveragePlacement.toFixed(2)}위`, character.averagePlacementDelta, true)}
+                    ${comparisonStat(`평균 순위 (${placementSource})`, `${Number(character.averagePlacement).toFixed(2)}위`, `${character.baselineAveragePlacement.toFixed(2)}위`, character.averagePlacementDelta, true)}
                     ${comparisonStat("최근 딜량", damage === null ? null : damage.toLocaleString("ko-KR"), baselineDamage.toLocaleString("ko-KR"), character.averageDamageDelta)}
                 </div>
             `;
