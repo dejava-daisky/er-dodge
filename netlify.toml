@@ -32,8 +32,8 @@
   status = 200
 
 [[redirects]]
-  from = "/api/patches/characters/:name"
-  to = "/.netlify/functions/patch-character?name=:name"
+  from = "/api/patches/character"
+  to = "/.netlify/functions/patch-character"
   status = 200
 
 [[headers]]
