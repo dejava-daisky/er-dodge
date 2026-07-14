@@ -155,6 +155,22 @@ function fallbackAnalysis(result) {
     시야점수: "이동 전에 카메라나 콘솔을 한 번 더 확인해.",
     "캐릭터 성과": "주력 캐릭터로 첫 교전 진입 타이밍을 한 박자 빠르게 잡아.",
   };
+  const problemDetail = (item) => {
+    const detail = item.detail ? ` 근거는 이거야. ${item.detail}` : "";
+    const templates = {
+      승률:
+        `승률 감점이 제일 무겁게 잡혔어. 한두 판 실수보다, 초반 손해가 우승각까지 가는 판을 줄이는 흐름에 가까워.${detail} 다음 판엔 첫 오브젝트 전까지 불필요한 교전을 피하는 것만 먼저 의식해.`,
+      TOP3:
+        `TOP3 쪽에서 상위권 진입 흐름이 흔들려. 싸움을 못 한다기보다, 초중반에 체력이나 동선을 잃고 후반 선택지가 줄어드는 쪽일 수 있어.${detail} 다음 판엔 첫 오브젝트 전까지 무리한 교전을 한 번만 참아.`,
+      평균순위:
+        `평균순위가 무거워. 교전을 열었는지보다, 교전 이후 회복과 다음 동선에서 손해를 보는 흐름일 수 있어.${detail} 다음 판엔 첫 교전이 끝나면 파밍을 더 하기 전에 안전 구역과 다음 오브젝트부터 봐.`,
+      시야점수:
+        `시야 쪽에서 정보 없이 움직이는 판이 섞여 있어. 교전 실력 문제가 아니라, 싸우기 전에 필요한 정보를 덜 들고 들어가는 쪽에 가까워.${detail} 다음 판엔 이동 전에 카메라나 콘솔을 한 번만 더 확인해.`,
+      "캐릭터 성과":
+        `주력 캐릭터 성과가 같은 티어 기대값보다 낮게 잡혔어. 캐릭터를 못 한다고 단정할 건 아니고, 최근 교전에서 딜을 넣는 타이밍이나 진입 각이 늦는 흐름일 수 있어.${detail} 다음 판엔 팀원이 먼저 맞기 전에 사거리 안으로 들어가는지만 확인해.`,
+    };
+    return templates[item.label] || `${item.label}에서 크게 깎였어.${detail} 다음 판엔 이 지표 하나만 먼저 의식해.`;
+  };
   return {
     nextAction: {
       message: primary ? (actionByLabel[primary.label] || `${primary.label}부터 하나만 의식해.`) : "지금 흐름은 크게 건드리지 말고 10판 더 유지해.",
@@ -164,7 +180,7 @@ function fallbackAnalysis(result) {
     },
     problems: ranked.slice(0, 3).map((item) => ({
       title: `${item.label} 점검`,
-      detail: `${item.label}에서 ${item.deduction}점 감점이 있어. ${item.detail}`,
+      detail: problemDetail(item),
     })),
   };
 }

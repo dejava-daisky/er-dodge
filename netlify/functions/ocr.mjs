@@ -19,11 +19,11 @@ async function runGeminiOcr(bytes, mimeType) {
           {
             parts: [
               {
-                text: "이미지에서 보이는 닉네임 또는 검색에 쓸 수 있는 텍스트만 추출해. 설명 없이 텍스트만 출력해.",
+                text: "이터널 리턴 팀원/플레이어 입력 화면입니다. 입력칸 안이나 오른쪽 아래에 보이는 플레이어 닉네임만 추출하세요. EMPTY, PLAYER, TEAM, RANK, 물음표 아이콘, 버튼 텍스트는 무시하세요. 닉네임 하나만 출력하세요. 설명하지 마세요.",
               },
               {
-                inlineData: {
-                  mimeType,
+                inline_data: {
+                  mime_type: mimeType,
                   data: base64,
                 },
               },
@@ -35,7 +35,10 @@ async function runGeminiOcr(bytes, mimeType) {
       signal: AbortSignal.timeout(Number(process.env.OCR_TIMEOUT_SECONDS || 25) * 1000),
     },
   );
-  if (!response.ok) throw new Error(`Gemini ${response.status}`);
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    throw new Error(`Gemini ${response.status}: ${body.slice(0, 300)}`);
+  }
   const data = await response.json();
   return (data?.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("") || "").trim();
 }
