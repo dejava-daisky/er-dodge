@@ -1,10 +1,56 @@
 import { json, readJsonBody } from "./lib/http.mjs";
+import crypto from "node:crypto";
 
 const DEFAULT_MODEL = "models/gemini-flash-lite-latest";
+const FEEDBACK_CACHE_VERSION = "2026-07-19.1";
 
 function finite(value) {
   return Number.isFinite(Number(value));
 }
+
+class TtlSingleFlightCache {
+  constructor({ maxEntries = 1000 } = {}) {
+    this.maxEntries = maxEntries;
+    this.values = new Map();
+    this.inFlight = new Map();
+  }
+
+  get(key) {
+    const entry = this.values.get(key);
+    if (!entry) return undefined;
+    if (entry.expiresAt <= Date.now()) {
+      this.values.delete(key);
+      return undefined;
+    }
+    return entry.value;
+  }
+
+  set(key, value, ttlMs) {
+    if (this.values.size >= this.maxEntries && !this.values.has(key)) {
+      this.values.delete(this.values.keys().next().value);
+    }
+    this.values.set(key, { value, expiresAt: Date.now() + ttlMs });
+    return value;
+  }
+
+  async getOrLoad(key, { ttlMs, loader }) {
+    const cached = this.get(key);
+    if (cached !== undefined) return cached;
+    if (this.inFlight.has(key)) return this.inFlight.get(key);
+
+    const pending = Promise.resolve()
+      .then(loader)
+      .then((value) => this.set(key, value, ttlMs))
+      .finally(() => {
+        this.inFlight.delete(key);
+      });
+
+    this.inFlight.set(key, pending);
+    return pending;
+  }
+}
+
+const feedbackCache = new TtlSingleFlightCache({ maxEntries: 1000 });
 
 function niaTone(value) {
   return String(value || "")
@@ -39,6 +85,14 @@ function compactPlayerForAi(result) {
     },
     characterComparison: (comparison?.characters || []).slice(0, 5),
   };
+}
+
+function feedbackCacheKey(result) {
+  const payload = compactPlayerForAi(result);
+  return `feedback:${FEEDBACK_CACHE_VERSION}:${crypto
+    .createHash("sha256")
+    .update(JSON.stringify(payload))
+    .digest("hex")}`;
 }
 
 function buildPrompt(result) {
@@ -225,11 +279,17 @@ export default async (request) => {
   if (data.result.error) {
     return json({ error: "오류 결과에는 피드백을 만들 수 없습니다." }, 400);
   }
-  try {
-    const analysis = await callGemini(data.result);
-    return json({ feedback: compactFeedback(analysis, data.result) });
-  } catch (error) {
-    console.warn("Gemini feedback unavailable:", error.message);
-    return json({ feedback: fallbackAnalysis(data.result) });
-  }
+  const feedback = await feedbackCache.getOrLoad(feedbackCacheKey(data.result), {
+    ttlMs: 6 * 60 * 60 * 1000,
+    loader: async () => {
+      try {
+        const analysis = await callGemini(data.result);
+        return compactFeedback(analysis, data.result);
+      } catch (error) {
+        console.warn("Gemini feedback unavailable:", error.message);
+        return fallbackAnalysis(data.result);
+      }
+    },
+  });
+  return json({ feedback });
 };

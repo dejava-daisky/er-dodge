@@ -7,12 +7,80 @@ import {
 const BASE_URL = "https://open-api.bser.io";
 const REQUEST_INTERVAL_MS = 1100;
 const REQUEST_TIMEOUT_MS = 10000;
-let currentSeasonIdCache = null;
 
 export class AnalyzerError extends Error {}
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+let erScheduleTail = Promise.resolve();
+let nextErRequestStartAt = 0;
+
+async function reserveErRequestStart() {
+  const reservation = erScheduleTail.then(async () => {
+    const waitMs = Math.max(0, nextErRequestStartAt - Date.now());
+    if (waitMs > 0) await delay(waitMs);
+    nextErRequestStartAt = Date.now() + REQUEST_INTERVAL_MS;
+  });
+  erScheduleTail = reservation.catch(() => undefined);
+  return reservation;
+}
+
+class TtlSingleFlightCache {
+  constructor({ maxEntries = 1000 } = {}) {
+    this.maxEntries = maxEntries;
+    this.values = new Map();
+    this.inFlight = new Map();
+  }
+
+  get(key) {
+    const entry = this.values.get(key);
+    if (!entry) return undefined;
+    if (entry.expiresAt <= Date.now()) {
+      this.values.delete(key);
+      return undefined;
+    }
+    return entry.value;
+  }
+
+  set(key, value, ttlMs) {
+    if (this.values.size >= this.maxEntries && !this.values.has(key)) {
+      this.values.delete(this.values.keys().next().value);
+    }
+    this.values.set(key, { value, expiresAt: Date.now() + ttlMs });
+    return value;
+  }
+
+  async getOrLoad(key, { ttlMs, loader, cacheErrors = false }) {
+    const cached = this.get(key);
+    if (cached !== undefined) return cached;
+    if (this.inFlight.has(key)) return this.inFlight.get(key);
+
+    const pending = Promise.resolve()
+      .then(loader)
+      .then((value) => {
+        if (cacheErrors || !value?.error) return this.set(key, value, ttlMs);
+        return value;
+      })
+      .finally(() => {
+        this.inFlight.delete(key);
+      });
+
+    this.inFlight.set(key, pending);
+    return pending;
+  }
+}
+
+const uidCache = new TtlSingleFlightCache({ maxEntries: 5000 });
+const gamesCache = new TtlSingleFlightCache({ maxEntries: 5000 });
+const seasonStatsCache = new TtlSingleFlightCache({ maxEntries: 5000 });
+const seasonIdCache = new TtlSingleFlightCache({ maxEntries: 4 });
+const analysisCache = new TtlSingleFlightCache({ maxEntries: 5000 });
+const ANALYSIS_CACHE_VERSION = "2026-07-19.1";
+
+function normalizeNicknameKey(nickname) {
+  return String(nickname || "").normalize("NFKC").trim().toLocaleLowerCase("ko-KR");
 }
 
 async function safeGet(path, params = {}) {
@@ -28,6 +96,7 @@ async function safeGet(path, params = {}) {
 
   let response;
   try {
+    await reserveErRequestStart();
     response = await fetch(url, {
       headers: { "x-api-key": apiKey },
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
@@ -39,8 +108,6 @@ async function safeGet(path, params = {}) {
       );
     }
     throw new AnalyzerError("전적 서버에 연결하지 못했습니다.");
-  } finally {
-    await delay(REQUEST_INTERVAL_MS);
   }
 
   if (response.status === 403 || response.status === 429) {
@@ -67,41 +134,51 @@ async function safeGet(path, params = {}) {
 }
 
 async function getUid(nickname) {
-  const data = await safeGet("/v1/user/nickname", { query: nickname });
-  const uid = data.user?.userId ?? data.user?.uid;
-  if (!uid) {
-    throw new AnalyzerError("해당 닉네임의 플레이어를 찾을 수 없습니다.");
-  }
-  return uid;
+  return uidCache.getOrLoad(`uid:${normalizeNicknameKey(nickname)}`, {
+    ttlMs: 24 * 60 * 60 * 1000,
+    loader: async () => {
+      const data = await safeGet("/v1/user/nickname", { query: nickname });
+      const uid = data.user?.userId ?? data.user?.uid;
+      if (!uid) {
+        throw new AnalyzerError("해당 닉네임의 플레이어를 찾을 수 없습니다.");
+      }
+      return uid;
+    },
+  });
 }
 
 async function getGames(uid, count = 20) {
-  const data = await safeGet(`/v1/user/games/uid/${uid}`);
-  if (!Array.isArray(data.userGames)) {
-    throw new AnalyzerError("경기 기록을 불러오지 못했습니다.");
-  }
+  return gamesCache.getOrLoad(`games:${uid}:${count}`, {
+    ttlMs: 60 * 1000,
+    loader: async () => {
+      const data = await safeGet(`/v1/user/games/uid/${uid}`);
+      if (!Array.isArray(data.userGames)) {
+        throw new AnalyzerError("경기 기록을 불러오지 못했습니다.");
+      }
 
-  const games = [...data.userGames];
-  if (games.length < 10 || games.length >= count) return games.slice(0, count);
+      const games = [...data.userGames];
+      if (games.length < 10 || games.length >= count) return games.slice(0, count);
 
-  const nextGameId = games.at(-1)?.gameId;
-  if (nextGameId == null) return games.slice(0, count);
+      const nextGameId = games.at(-1)?.gameId;
+      if (nextGameId == null) return games.slice(0, count);
 
-  try {
-    const nextData = await safeGet(`/v1/user/games/uid/${uid}`, {
-      next: nextGameId,
-    });
-    if (Array.isArray(nextData.userGames)) {
-      const seenIds = new Set(games.map((game) => game.gameId));
-      games.push(
-        ...nextData.userGames.filter((game) => !seenIds.has(game.gameId)),
-      );
-    }
-  } catch (error) {
-    console.warn("Could not load the second match-history page:", error.message);
-  }
+      try {
+        const nextData = await safeGet(`/v1/user/games/uid/${uid}`, {
+          next: nextGameId,
+        });
+        if (Array.isArray(nextData.userGames)) {
+          const seenIds = new Set(games.map((game) => game.gameId));
+          games.push(
+            ...nextData.userGames.filter((game) => !seenIds.has(game.gameId)),
+          );
+        }
+      } catch (error) {
+        console.warn("Could not load the second match-history page:", error.message);
+      }
 
-  return games.slice(0, count);
+      return games.slice(0, count);
+    },
+  });
 }
 
 function getRankSeasonFromGames(games) {
@@ -112,29 +189,36 @@ function getRankSeasonFromGames(games) {
 }
 
 async function getCurrentSeasonId() {
-  if (currentSeasonIdCache != null) return currentSeasonIdCache;
+  return seasonIdCache.getOrLoad("current-season", {
+    ttlMs: 6 * 60 * 60 * 1000,
+    loader: async () => {
+      const data = await safeGet("/v2/data/Season");
+      if (!Array.isArray(data.data)) {
+        throw new AnalyzerError("현재 시즌 정보를 불러오지 못했습니다.");
+      }
 
-  const data = await safeGet("/v2/data/Season");
-  if (!Array.isArray(data.data)) {
-    throw new AnalyzerError("현재 시즌 정보를 불러오지 못했습니다.");
-  }
+      const current = data.data.find((season) => Number(season.isCurrent) === 1);
+      const seasonId = Number(current?.seasonID ?? current?.seasonId);
+      if (!Number.isInteger(seasonId) || seasonId <= 0) {
+        throw new AnalyzerError("현재 시즌 정보를 찾을 수 없습니다.");
+      }
 
-  const current = data.data.find((season) => Number(season.isCurrent) === 1);
-  const seasonId = Number(current?.seasonID ?? current?.seasonId);
-  if (!Number.isInteger(seasonId) || seasonId <= 0) {
-    throw new AnalyzerError("현재 시즌 정보를 찾을 수 없습니다.");
-  }
-
-  currentSeasonIdCache = seasonId;
-  return currentSeasonIdCache;
+      return seasonId;
+    },
+  });
 }
 
 async function getSeasonStats(uid, seasonId) {
-  const data = await safeGet(`/v2/user/stats/uid/${uid}/${seasonId}/3`);
-  if (!Array.isArray(data.userStats) || !data.userStats.length) {
-    throw new AnalyzerError("해당 시즌의 랭크 통계를 찾을 수 없습니다.");
-  }
-  return data.userStats[0];
+  return seasonStatsCache.getOrLoad(`season-stats:${uid}:${seasonId}`, {
+    ttlMs: 2 * 60 * 1000,
+    loader: async () => {
+      const data = await safeGet(`/v2/user/stats/uid/${uid}/${seasonId}/3`);
+      if (!Array.isArray(data.userStats) || !data.userStats.length) {
+        throw new AnalyzerError("해당 시즌의 랭크 통계를 찾을 수 없습니다.");
+      }
+      return data.userStats[0];
+    },
+  });
 }
 
 function recentRankGames(games, seasonId, count = 20) {
@@ -947,16 +1031,21 @@ export async function evaluatePlayer(nickname) {
 }
 
 export async function analyzeNickname(nickname) {
-  try {
-    return await evaluatePlayer(nickname);
-  } catch (error) {
-    if (!(error instanceof AnalyzerError)) console.error(error);
-    return {
-      nickname,
-      error:
-        error instanceof AnalyzerError
-          ? error.message
-          : "분석 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.",
-    };
-  }
+  return analysisCache.getOrLoad(`analysis:${ANALYSIS_CACHE_VERSION}:${normalizeNicknameKey(nickname)}`, {
+    ttlMs: 60 * 1000,
+    loader: async () => {
+      try {
+        return await evaluatePlayer(nickname);
+      } catch (error) {
+        if (!(error instanceof AnalyzerError)) console.error(error);
+        return {
+          nickname,
+          error:
+            error instanceof AnalyzerError
+              ? error.message
+              : "분석 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+        };
+      }
+    },
+  });
 }

@@ -1,0 +1,6 @@
+.git
+.netlify
+node_modules
+.netlify-dev*.log
+.env
+data/dakgg_stats.sqlite3

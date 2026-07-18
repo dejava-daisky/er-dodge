@@ -29,7 +29,8 @@
             min-height: 100vh;
             margin: 0;
             color: var(--text);
-            font-family: Inter, Pretendard, "Noto Sans KR", system-ui, sans-serif;
+            font-family: Pretendard, "Noto Sans KR", Inter, system-ui, sans-serif;
+            font-size: 15px;
             background:
                 radial-gradient(circle at 50% -12%, rgba(139, 92, 246, 0.16), transparent 34%),
                 linear-gradient(180deg, #100d17 0%, #09070d 58%, #07060a 100%),
@@ -485,7 +486,9 @@
             padding-top: 18px;
             border-top: 1px solid var(--line);
             color: #b8bdc6;
-            font-size: 13px;
+            font-size: 14px;
+            line-height: 1.75;
+            letter-spacing: -0.01em;
         }
 
         .warnings {
@@ -704,7 +707,7 @@
         .tier-comparison { padding: 20px; border: 1px solid var(--line); background: #0d0f14; }
         .comparison-head { display: flex; gap: 12px; align-items: end; justify-content: space-between; margin-bottom: 14px; }
         .comparison-head h3 { margin: 0; font-size: 16px; }
-        .comparison-head p { margin: 0; color: var(--muted); font-size: 10px; text-align: right; }
+        .comparison-head p { margin: 0; color: var(--muted); font-size: 12px; text-align: right; }
         .comparison-list { display: grid; gap: 8px; }
         .comparison-row {
             display: grid;
@@ -715,7 +718,7 @@
             background: #101319;
         }
         .comparison-character strong, .comparison-stat strong { display: block; color: var(--white); font-size: 13px; }
-        .comparison-character small, .comparison-stat small { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; }
+        .comparison-character small, .comparison-stat small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.55; }
         .comparison-stat .better { color: #63d792; }
         .comparison-stat .worse { color: #ff7885; }
         .comparison-stat .neutral { color: var(--muted); }
@@ -877,13 +880,14 @@
             display: block;
             margin-bottom: 8px;
             color: #f1d89f;
-            font-size: 13px;
+            font-size: 14px;
         }
 
         .sample-notice p {
             margin: 0;
-            font-size: 11px;
-            line-height: 1.75;
+            font-size: 13px;
+            line-height: 1.8;
+            letter-spacing: -0.01em;
         }
 
         .sample-notice b {
@@ -1049,8 +1053,9 @@
         .healthy-feedback-body p,
         .healthy-feedback-body li {
             color: #d6d0c5;
-            font-size: 13px;
-            line-height: 1.7;
+            font-size: 14px;
+            line-height: 1.8;
+            letter-spacing: -0.01em;
         }
 
         .healthy-feedback-body ol {
@@ -1309,8 +1314,8 @@
         .patch-changes {
             margin-top: 12px;
             color: #c5cad3;
-            font-size: 12px;
-            line-height: 1.65;
+            font-size: 13px;
+            line-height: 1.7;
             white-space: pre-line;
         }
 
@@ -1368,8 +1373,8 @@
         .score-note {
             margin: 18px 0 0;
             color: var(--muted);
-            font-size: 11px;
-            line-height: 1.7;
+            font-size: 13px;
+            line-height: 1.75;
         }
 
         @media (max-width: 900px) {
