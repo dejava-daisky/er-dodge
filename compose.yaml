@@ -1,0 +1,18 @@
+services:
+  er-dodge:
+    build:
+      context: .
+    container_name: er-dodge
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8888
+      PYTHON_BIN: python3
+      STATS_REFRESH_INTERVAL_MS: 21600000
+      STATS_REFRESH_ON_START: "false"
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./data:/app/data
