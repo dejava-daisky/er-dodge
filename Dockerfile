@@ -2,11 +2,14 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-COPY package.json ./
-RUN npm install --no-save netlify-cli@latest
+RUN apk add --no-cache python3
 
 COPY . .
 
 EXPOSE 8888
 
-CMD ["./node_modules/.bin/netlify", "dev", "--host", "0.0.0.0", "--port", "8888"]
+ENV HOST=0.0.0.0
+ENV PORT=8888
+ENV PYTHON_BIN=python3
+
+CMD ["node", "server.mjs"]

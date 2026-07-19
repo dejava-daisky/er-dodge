@@ -72,6 +72,12 @@ export async function getDakggStats() {
   return pendingLoad;
 }
 
+export function resetDakggStatsCache() {
+  cache = null;
+  cacheExpiresAt = 0;
+  pendingLoad = null;
+}
+
 export function tierForMmr(mmr, rank = null) {
   const numericRank =
     rank == null || rank === "" ? null : Number(rank);

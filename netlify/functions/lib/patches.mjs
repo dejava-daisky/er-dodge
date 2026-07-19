@@ -146,3 +146,7 @@ export function characterDetail(name) {
     patches: byCharacter.get(name) ?? [],
   };
 }
+
+export function resetPatchCache() {
+  cache = null;
+}

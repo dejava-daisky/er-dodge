@@ -2557,7 +2557,7 @@
         results.innerHTML = "";
 
         try {
-            const response = await fetch("/analyze", {
+            const response = await fetch("/api/analyze", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({nicknames})
@@ -2597,7 +2597,7 @@
         myOutput.innerHTML = "";
 
         try {
-            const response = await fetch("/analyze/me", {
+            const response = await fetch("/api/analyze/me", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({nickname})
@@ -2662,7 +2662,7 @@
         content.innerHTML = `<p>\uB9AC\uD50C\uB808\uC774 \uB2E4\uC2DC \uBCF4\uB294 \uC911. \uC7A0\uAE50\uB9CC.</p>`;
 
         try {
-            const response = await fetch("/analyze/feedback", {
+            const response = await fetch("/api/analyze/feedback", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({result: latestMyResult})
